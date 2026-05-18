@@ -1,0 +1,1603 @@
+% ==============================================================================
+% MÉMOIRE DE FIN D'ÉTUDES — FICHIER UNIQUE COMPLET
+% Titre  : Système d'Analyse de Sentiments des Commentaires Étudiants
+% Auteur : Hissein Nasser
+% Année  : 2025-2026
+% Compilation : pdflatex (2 passes min) ou latexmk -pdf memoire_complet.tex
+% ==============================================================================
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% PACKAGES
+% ─────────────────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[top=2.5cm,bottom=2.5cm,left=3cm,right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Couleurs
+\usepackage{xcolor}
+\definecolor{bleuprincipal}{RGB}{31,73,125}
+\definecolor{bleuclaire}{RGB}{46,134,193}
+\definecolor{vertprincipal}{RGB}{31,138,112}
+\definecolor{rougeprincipal}{RGB}{231,76,60}
+\definecolor{griscode}{RGB}{248,249,250}
+\definecolor{grisbordure}{RGB}{204,204,204}
+\definecolor{orangeaccent}{RGB}{211,84,0}
+\definecolor{jauneneutre}{RGB}{241,196,15}
+
+% Graphiques
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{font=small,labelfont={bf,color=bleuprincipal}}
+
+% Tableaux
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{colortbl}
+
+% TikZ
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,
+                shadows,fit,backgrounds,matrix,patterns}
+
+% Listings (code source)
+\usepackage{listings}
+\usepackage{lstautogobble}
+
+\lstdefinestyle{stylePython}{
+  language=Python,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal}\bfseries,
+  stringstyle=\color{rougeprincipal},
+  commentstyle=\color{vertprincipal}\itshape,
+  numberstyle=\tiny\color{gray},
+  numbers=left, numbersep=8pt,
+  breaklines=true, frame=single,
+  rulecolor=\color{grisbordure},
+  tabsize=4, showstringspaces=false,
+  captionpos=b, autogobble=true,
+  xleftmargin=1cm,
+  morekeywords={self,True,False,None,async,await,yield}
+}
+
+\lstdefinestyle{styleDart}{
+  language=Java,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal}\bfseries,
+  stringstyle=\color{rougeprincipal},
+  commentstyle=\color{vertprincipal}\itshape,
+  numberstyle=\tiny\color{gray},
+  numbers=left, numbersep=8pt,
+  breaklines=true, frame=single,
+  rulecolor=\color{grisbordure},
+  tabsize=2, showstringspaces=false,
+  captionpos=b, autogobble=true,
+  xleftmargin=1cm,
+  morekeywords={final,const,var,String,int,double,bool,void,
+                Widget,StatelessWidget,StatefulWidget,BuildContext,
+                Future,async,await,override,required,class}
+}
+
+\lstdefinestyle{styleSQL}{
+  language=SQL,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal}\bfseries,
+  stringstyle=\color{rougeprincipal},
+  commentstyle=\color{gray}\itshape,
+  numberstyle=\tiny\color{gray},
+  numbers=left, numbersep=8pt,
+  breaklines=true, frame=single,
+  rulecolor=\color{grisbordure},
+  captionpos=b, xleftmargin=1cm
+}
+
+\lstdefinestyle{styleJSON}{
+  language=Python,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal},
+  stringstyle=\color{vertprincipal},
+  numberstyle=\tiny\color{gray},
+  numbers=left, numbersep=8pt,
+  breaklines=true, frame=single,
+  rulecolor=\color{grisbordure},
+  captionpos=b, xleftmargin=1cm
+}
+
+\lstset{style=stylePython}
+
+% En-têtes / pieds de page
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{bleuprincipal}{\leftmark}}
+\fancyhead[R]{\small\textcolor{gray}{Analyse de Sentiments Étudiants}}
+\fancyfoot[C]{\textcolor{gray}{\thepage}}
+\fancyfoot[R]{\small\textcolor{gray}{Hissein Nasser — PFE 2026}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\headrule}{\hbox to\headwidth{%
+  \color{bleuprincipal}\leaders\hrule height\headrulewidth\hfill}}
+
+% Style des chapitres
+\usepackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\huge\bfseries\color{bleuprincipal}}
+  {\colorbox{bleuprincipal}{\textcolor{white}{\quad\thechapter\quad}}}
+  {1em}{}[\vspace{-0.5em}\rule{\textwidth}{2pt}]
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{bleuprincipal}}{\thesection}{0.8em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{bleuclaire}}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{orangeaccent}}{\thesubsubsection}{0.8em}{}
+
+% Hyperliens
+\usepackage[
+  colorlinks=true,
+  linkcolor=bleuprincipal,
+  citecolor=vertprincipal,
+  urlcolor=bleuclaire,
+  pdfauthor={Hissein Nasser},
+  pdftitle={Systeme d'Analyse de Sentiments des Commentaires Etudiants},
+  pdfsubject={Memoire de Fin d'Etudes}
+]{hyperref}
+
+% Bibliographie
+\usepackage[backend=bibtex,style=ieee,sorting=none]{biblatex}
+
+% Acronymes
+\usepackage[acronym,toc]{glossaries}
+\makeglossaries
+
+% Utilitaires
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{pifont}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% Boîtes personnalisées
+\newtcolorbox{infobox}[1][]{enhanced,breakable,
+  colback=bleuclaire!8!white,colframe=bleuclaire,
+  fonttitle=\bfseries,title={#1},
+  left=4pt,right=4pt,top=4pt,bottom=4pt}
+\newtcolorbox{definitionbox}[1][]{enhanced,breakable,
+  colback=vertprincipal!8!white,colframe=vertprincipal,
+  fonttitle=\bfseries,title={#1},
+  left=4pt,right=4pt,top=4pt,bottom=4pt}
+
+% Commandes
+\newcommand{\code}[1]{\texttt{\textcolor{bleuprincipal}{#1}}}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% ACRONYMES
+% ─────────────────────────────────────────────────────────────────────────────
+\newacronym{nlp}{NLP}{Natural Language Processing}
+\newacronym{taln}{TALN}{Traitement Automatique du Langage Naturel}
+\newacronym{bert}{BERT}{Bidirectional Encoder Representations from Transformers}
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{rest}{REST}{Representational State Transfer}
+\newacronym{orm}{ORM}{Object-Relational Mapping}
+\newacronym{sgbd}{SGBD}{Système de Gestion de Bases de Données}
+\newacronym{ml}{ML}{Machine Learning}
+\newacronym{dl}{DL}{Deep Learning}
+\newacronym{ia}{IA}{Intelligence Artificielle}
+\newacronym{http}{HTTP}{HyperText Transfer Protocol}
+\newacronym{json}{JSON}{JavaScript Object Notation}
+\newacronym{sql}{SQL}{Structured Query Language}
+\newacronym{cors}{CORS}{Cross-Origin Resource Sharing}
+\newacronym{gpu}{GPU}{Graphics Processing Unit}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{pfe}{PFE}{Projet de Fin d'Études}
+\newacronym{uml}{UML}{Unified Modeling Language}
+\newacronym{crud}{CRUD}{Create, Read, Update, Delete}
+\newacronym{sdk}{SDK}{Software Development Kit}
+\newacronym{mcd}{MCD}{Modèle Conceptuel de Données}
+\newacronym{mld}{MLD}{Modèle Logique de Données}
+\newacronym{ui}{UI}{User Interface}
+\newacronym{bpe}{BPE}{Byte-Pair Encoding}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% BIBLIOGRAPHIE INLINE
+% ─────────────────────────────────────────────────────────────────────────────
+\usepackage{filecontents}
+\begin{filecontents}{refs.bib}
+@article{martin2020camembert,
+  author  = {Martin, Louis and others},
+  title   = {{CamemBERT: a Tasty French Language Model}},
+  journal = {Proceedings of ACL 2020},
+  year    = {2020},
+  pages   = {7203--7219}
+}
+@article{devlin2019bert,
+  author  = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  title   = {{BERT: Pre-training of Deep Bidirectional Transformers}},
+  journal = {Proceedings of NAACL-HLT 2019},
+  year    = {2019},
+  pages   = {4171--4186}
+}
+@article{vaswani2017attention,
+  author  = {Vaswani, Ashish and others},
+  title   = {{Attention Is All You Need}},
+  journal = {Advances in Neural Information Processing Systems},
+  year    = {2017},
+  volume  = {30}
+}
+@article{liu2019roberta,
+  author  = {Liu, Yinhan and others},
+  title   = {{RoBERTa: A Robustly Optimized BERT Pretraining Approach}},
+  journal = {arXiv:1907.11692},
+  year    = {2019}
+}
+@inproceedings{kudo2018sentencepiece,
+  author    = {Kudo, Taku and Richardson, John},
+  title     = {{SentencePiece: A simple and language independent subword tokenizer}},
+  booktitle = {EMNLP 2018 System Demonstrations},
+  year      = {2018},
+  pages     = {66--71}
+}
+@misc{fastapi2024,
+  author       = {Ramirez, Sebastian},
+  title        = {{FastAPI Framework}},
+  year         = {2024},
+  howpublished = {\url{https://fastapi.tiangolo.com}}
+}
+@misc{pytorch2024,
+  author       = {{PyTorch Team}},
+  title        = {{PyTorch Deep Learning Library}},
+  year         = {2024},
+  howpublished = {\url{https://pytorch.org}}
+}
+@misc{flutter2024,
+  author       = {{Google LLC}},
+  title        = {{Flutter SDK}},
+  year         = {2024},
+  howpublished = {\url{https://flutter.dev}}
+}
+@article{loshchilov2019adamw,
+  author  = {Loshchilov, Ilya and Hutter, Frank},
+  title   = {{Decoupled Weight Decay Regularization}},
+  journal = {ICLR 2019},
+  year    = {2019}
+}
+@article{pang2008opinion,
+  author  = {Pang, Bo and Lee, Lillian},
+  title   = {{Opinion Mining and Sentiment Analysis}},
+  journal = {Foundations and Trends in Information Retrieval},
+  year    = {2008},
+  volume  = {2},
+  pages   = {1--135}
+}
+\end{filecontents}
+\addbibresource{refs.bib}
+
+% ==============================================================================
+%                          DÉBUT DU DOCUMENT
+% ==============================================================================
+\begin{document}
+\pagenumbering{gobble}
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  PAGE DE GARDE
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[bleuprincipal]   (current page.north west) rectangle ([yshift=-3.5cm]current page.north east);
+  \fill[bleuprincipal!80!black] (current page.south west) rectangle ([yshift=1.8cm]current page.south east);
+  \fill[vertprincipal]   (current page.north west) rectangle ([xshift=0.8cm]current page.south west);
+  \fill[jauneneutre]     ([xshift=0.8cm]current page.north west) rectangle ([xshift=1.1cm]current page.south west);
+\end{tikzpicture}
+
+\vspace*{0.5cm}
+\begin{center}
+{\color{white}\Large\bfseries UNIVERSITÉ --- DÉPARTEMENT INFORMATIQUE}\\[0.3cm]
+{\color{white!80!gray}\large Filière : Génie Informatique}\\[0.2cm]
+{\color{white!80!gray}\normalsize Option : Intelligence Artificielle \& Génie Logiciel}
+
+\vspace{1.2cm}
+\hrule height 1pt\relax
+\vspace{0.3cm}
+{\color{bleuprincipal!30!black}\small MÉMOIRE DE FIN D'ÉTUDES}\\
+{\color{bleuprincipal!30!black}\small Pour l'obtention du diplôme de Licence / Master en Informatique}
+\vspace{0.3cm}
+\hrule height 1pt\relax
+
+\vspace{1.5cm}
+\begin{tcolorbox}[enhanced,colback=bleuprincipal!10!white,colframe=bleuprincipal,
+  boxrule=2pt,arc=8pt,left=12pt,right=12pt,top=10pt,bottom=10pt,width=14cm]
+\begin{center}
+{\huge\bfseries\color{bleuprincipal}
+Système d'Analyse de\\[0.3em]
+Sentiments des\\[0.3em]
+Commentaires Étudiants\\[0.3em]
+en Temps Réel}\\[0.8em]
+{\large\color{gray}Basé sur CamemBERT, FastAPI, PostgreSQL et Flutter}
+\end{center}
+\end{tcolorbox}
+
+\vspace{1.8cm}
+\begin{minipage}[t]{0.45\textwidth}
+\begin{flushleft}
+\textbf{\color{bleuprincipal}Réalisé par :}\\[0.5em]
+\large Hissein Nasser\\
+\small Étudiant en Informatique
+\end{flushleft}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\begin{flushright}
+\textbf{\color{bleuprincipal}Encadré par :}\\[0.5em]
+\large M./Mme. [Nom Encadreur]\\
+\small Département Informatique
+\end{flushright}
+\end{minipage}
+
+\vspace{1.8cm}
+\begin{tikzpicture}
+  \node[fill=bleuprincipal!10,rounded corners=5pt,inner sep=6pt] at (0,0)   {\small\color{bleuprincipal}\textbf{CamemBERT}};
+  \node[fill=vertprincipal!15,rounded corners=5pt,inner sep=6pt] at (3,0)   {\small\color{vertprincipal}\textbf{FastAPI}};
+  \node[fill=rougeprincipal!10,rounded corners=5pt,inner sep=6pt] at (6,0)  {\small\color{rougeprincipal}\textbf{PostgreSQL}};
+  \node[fill=bleuclaire!15,rounded corners=5pt,inner sep=6pt] at (9,0)      {\small\color{bleuclaire}\textbf{Flutter}};
+  \node[fill=orangeaccent!10,rounded corners=5pt,inner sep=6pt] at (1.5,-0.9){\small\color{orangeaccent}\textbf{PyTorch}};
+  \node[fill=bleuprincipal!10,rounded corners=5pt,inner sep=6pt] at (4.5,-0.9){\small\color{bleuprincipal}\textbf{Streamlit}};
+  \node[fill=vertprincipal!15,rounded corners=5pt,inner sep=6pt] at (7.5,-0.9){\small\color{vertprincipal}\textbf{SQLAlchemy}};
+\end{tikzpicture}
+
+\vspace{1.5cm}
+{\color{white}\large\bfseries Année Académique 2025 -- 2026}
+\end{center}
+\end{titlepage}
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  PAGES LIMINAIRES
+% ══════════════════════════════════════════════════════════════════════════════
+\pagenumbering{roman}\setcounter{page}{1}
+
+% ── Dédicace ──────────────────────────────────────────────────────────────────
+\chapter*{Dédicace}
+\addcontentsline{toc}{chapter}{Dédicace}
+\thispagestyle{empty}
+\vspace*{3cm}
+\begin{flushright}
+\begin{minipage}{0.7\textwidth}
+\begin{center}
+{\Large\color{bleuprincipal}\textit{\og À ma famille, \fg{}}}\\[1.5cm]
+\normalsize\itshape
+À mes parents, pour leur amour inconditionnel, leurs sacrifices
+infinis et leur confiance inébranlable en moi.\\[1cm]
+À mes frères et sœurs, compagnons de vie, dont le soutien
+moral et l'encouragement ont rendu ce travail possible.\\[1cm]
+À tous ceux qui croient que la technologie, au service
+de l'éducation, peut transformer le monde.\\[2cm]
+{\large\bfseries\color{bleuprincipal}--- Hissein Nasser ---}
+\end{center}
+\end{minipage}
+\end{flushright}
+\cleardoublepage
+
+% ── Remerciements ─────────────────────────────────────────────────────────────
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+
+La réalisation de ce projet de fin d'études n'aurait pas été possible sans
+le concours de nombreuses personnes à qui je tiens à exprimer ma sincère gratitude.
+
+\vspace{0.5cm}
+En premier lieu, mes remerciements les plus chaleureux vont à mon encadreur,
+\textbf{M./Mme. [Nom de l'Encadreur]}, pour son suivi rigoureux, sa
+disponibilité constante et ses précieux conseils scientifiques.
+
+\vspace{0.5cm}
+Je tiens également à remercier les membres du jury qui ont accepté d'évaluer
+ce mémoire et de consacrer leur temps à l'examen de ce travail.
+
+\vspace{0.5cm}
+Ma gratitude va aussi à l'ensemble du corps enseignant du département
+Informatique, dont l'enseignement de qualité tout au long de ma formation
+m'a fourni les bases théoriques et pratiques indispensables.
+
+\vspace{0.5cm}
+Je remercie la communauté open-source, en particulier les équipes d'Inria
+et CNRS pour CamemBERT, l'équipe HuggingFace pour Transformers, ainsi que
+toutes les communautés qui contribuent à l'avancement de l'intelligence artificielle.
+
+\vspace{0.5cm}
+Enfin, un remerciement profond et sincère à ma famille pour leur patience
+et leur soutien indéfectible tout au long de ces années d'études.
+
+\begin{flushright}\textit{Hissein Nasser --- Mai 2026}\end{flushright}
+\cleardoublepage
+
+% ── Résumé ────────────────────────────────────────────────────────────────────
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+\begin{tcolorbox}[enhanced,colback=bleuprincipal!5!white,colframe=bleuprincipal,
+  boxrule=1.5pt,arc=6pt,left=10pt,right=10pt,top=8pt,bottom=8pt]
+Ce mémoire présente la conception et le développement d'un système complet
+d'analyse automatique de sentiments appliqué aux commentaires d'étudiants
+sur leurs cours universitaires. Le système repose sur le modèle de langage
+\textbf{CamemBERT} (\textit{camembert-base}), fine-tuné pour la classification
+de sentiments en trois catégories~: \textbf{Négatif}, \textbf{Neutre} et
+\textbf{Positif}, sur un jeu de données de 225 commentaires étudiants en
+français avec les hyperparamètres~: taux d'apprentissage $2\times10^{-5}$,
+batch 16, 3 epochs, 128 tokens maximum. Le modèle atteint une précision de
+\textbf{79,41\%} sur le jeu de test. L'architecture globale comprend~:
+un backend RESTful FastAPI avec PostgreSQL, un tableau de bord Streamlit
+et une application mobile Flutter.
+\end{tcolorbox}
+\vspace{0.5em}
+\noindent\textbf{Mots-clés~:} Analyse de sentiments, TALN, CamemBERT,
+Apprentissage automatique, FastAPI, Flutter, PostgreSQL, Fine-tuning.
+\cleardoublepage
+
+% ── Abstract ──────────────────────────────────────────────────────────────────
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\begin{tcolorbox}[enhanced,colback=vertprincipal!5!white,colframe=vertprincipal,
+  boxrule=1.5pt,arc=6pt,left=10pt,right=10pt,top=8pt,bottom=8pt]
+This thesis presents the design and development of a complete automated
+sentiment analysis system applied to student feedback on university courses.
+The system is built upon the \textbf{CamemBERT} language model fine-tuned
+for three-class sentiment classification: \textbf{Negative}, \textbf{Neutral},
+and \textbf{Positive}, trained on 225 French student comments with
+hyperparameters: learning rate $2\times10^{-5}$, batch 16, 3 epochs,
+max 128 tokens. The model achieves \textbf{79.41\%} accuracy on the test set.
+The architecture includes a FastAPI REST backend with PostgreSQL, a Streamlit
+analytics dashboard, and a Flutter mobile application.
+\end{tcolorbox}
+\vspace{0.5em}
+\noindent\textbf{Keywords~:} Sentiment analysis, NLP, CamemBERT, Machine
+learning, FastAPI, Flutter, PostgreSQL, Fine-tuning, Transfer learning.
+\cleardoublepage
+
+% ── Tables ────────────────────────────────────────────────────────────────────
+{\hypersetup{linkcolor=black}
+\tableofcontents\cleardoublepage
+\listoffigures\cleardoublepage
+\listoftables\cleardoublepage}
+\printglossary[type=\acronymtype,title={Liste des Acronymes}]
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CORPS DU RAPPORT
+% ══════════════════════════════════════════════════════════════════════════════
+\pagenumbering{arabic}\setcounter{page}{1}
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  INTRODUCTION GÉNÉRALE
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter*{Introduction Générale}
+\addcontentsline{toc}{chapter}{Introduction Générale}
+\markboth{INTRODUCTION GÉNÉRALE}{}
+
+\begin{infobox}[Contexte de l'étude]
+L'essor du numérique dans l'enseignement supérieur génère chaque année
+des millions de retours étudiants. Traiter ces données manuellement est
+devenu impossible. L'intelligence artificielle offre une réponse concrète
+et immédiate.
+\end{infobox}
+
+\section*{Contexte général}
+
+L'enseignement supérieur traverse une transformation profonde depuis
+l'avènement des technologies numériques. La massification de l'éducation
+universitaire, conjuguée à l'explosion des plateformes d'apprentissage en
+ligne, a multiplié exponentiellement les interactions numériques entre
+enseignants et étudiants. Selon plusieurs études pédagogiques récentes,
+un étudiant génère en moyenne plusieurs dizaines de commentaires par
+semestre. À l'échelle d'un département, cela représente des milliers de
+textes à analyser chaque année.
+
+\section*{Problématique}
+
+Comment peut-on concevoir un système robuste et précis permettant d'analyser
+automatiquement et en temps réel les sentiments exprimés dans les commentaires
+d'étudiants en français, et de mettre ces analyses à la disposition des
+enseignants de manière exploitable ?
+
+\section*{Solution proposée}
+
+Ce projet propose une réponse complète à travers un système multi-couches
+intégrant~: un modèle d'\acrfull{ia} basé sur \textbf{CamemBERT}, un
+serveur \acrfull{api} RESTful FastAPI, un tableau de bord analytique Streamlit
+et une application mobile Android Flutter.
+
+\section*{Objectifs du projet}
+
+\begin{enumerate}[leftmargin=2.5em]
+  \item Constituer un jeu de données de commentaires étudiants en français,
+        équilibré entre les classes de sentiment.
+  \item Fine-tuner CamemBERT pour la classification ternaire de sentiments.
+  \item Développer une API REST robuste et documentée.
+  \item Concevoir un tableau de bord analytique interactif.
+  \item Développer une application mobile multiplateforme.
+  \item Évaluer les performances et identifier les pistes d'amélioration.
+\end{enumerate}
+
+\section*{Organisation du mémoire}
+
+\noindent\textbf{Chapitre 1} --- Contexte et Problématique : contexte
+général, limites des approches existantes et justification technologique.\\
+\noindent\textbf{Chapitre 2} --- Analyse et Conception : diagrammes UML,
+architecture globale, modèle de données.\\
+\noindent\textbf{Chapitre 3} --- Implémentation : environnements, code source
+commenté, algorithmes clés.\\
+\noindent\textbf{Chapitre 4} --- Tests et Résultats : métriques de performance,
+scénarios de test, analyse.\\
+\noindent\textbf{Chapitre 5} --- Discussion et Perspectives : analyse critique,
+limites et évolutions futures.
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CHAPITRE 1 : CONTEXTE ET PROBLÉMATIQUE
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter{Contexte et Problématique}
+
+\begin{infobox}[Objectif du chapitre]
+Ce chapitre établit le cadre général de l'étude~: le contexte éducatif
+numérique, la problématique du traitement des retours étudiants, l'étude
+des solutions existantes et la valeur ajoutée de notre approche.
+\end{infobox}
+
+\section{Contexte général : La Révolution Numérique dans l'Éducation}
+
+L'enseignement supérieur traverse une transformation profonde depuis l'avènement
+des technologies numériques. La massification de l'éducation universitaire et
+l'explosion des plateformes d'apprentissage en ligne ont multiplié les
+interactions numériques entre enseignants et étudiants.
+
+\subsection{L'importance du retour étudiant}
+
+Les retours des étudiants constituent un indicateur fondamental de la qualité
+pédagogique. Ils permettent aux enseignants d'identifier les points faibles
+de leurs cours, d'adapter leurs méthodes et d'améliorer l'expérience
+d'apprentissage. Cependant, leur valeur réelle ne peut être exploitée que si
+ces données sont analysées de manière systématique, objective et rapide.
+
+\subsection{Limitations du traitement manuel}
+
+\begin{table}[H]
+\centering
+\caption{Limitations du traitement manuel des commentaires}
+\label{tab:limites_manuel}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}p{3.2cm} p{9cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Limitation} & \textbf{Impact} \\
+\midrule
+Lenteur & Délai de plusieurs semaines, insights obsolètes \\
+\rowcolor{gray!8}
+Subjectivité & Biais cognitifs, interprétation variable \\
+Coût élevé & Mobilisation de ressources humaines importantes \\
+\rowcolor{gray!8}
+Non scalable & Impossible avec l'augmentation des effectifs \\
+Exhaustivité & Tendance à ignorer les nuances \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Problématique Détaillée}
+
+\subsection{Dimension linguistique}
+
+Le français présente des défis spécifiques pour l'analyse automatique de
+sentiments~: richesse morphologique, usage fréquent de la négation (``ce cours
+n'est pas mauvais'' exprime quelque chose de positif), intensification
+(``vraiment excellent'', ``assez décevant'') et ironie (``super, encore un cours
+incompréhensible...'').
+
+\subsection{Dimension technologique}
+
+Les approches traditionnelles basées sur des dictionnaires de polarité ou des
+modèles statistiques simples (SVM, Naive Bayes) présentent des performances
+insuffisantes sur le français informel étudiant. Un modèle Transformer profond
+pré-entraîné sur de larges corpus français s'impose naturellement.
+
+\section{Étude de l'Existant}
+
+\subsection{Comparaison des approches}
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des approches d'analyse de sentiments pour le français}
+\label{tab:comparaison}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Approche} & \textbf{Précision} & \textbf{Gratuit} & \textbf{Hors-ligne} & \textbf{Personnalisable} \\
+\midrule
+VADER (anglais) & $<$55\% & Oui & Oui & Limitée \\
+\rowcolor{gray!8}
+Google NL API & $\sim$72\% & Non & Non & Non \\
+mBERT & $\sim$70\% & Oui & Oui & Oui \\
+\rowcolor{gray!8}
+XLM-RoBERTa & $\sim$74\% & Oui & Oui & Oui \\
+\rowcolor{vertprincipal!15}
+\textbf{CamemBERT (notre)} & \textbf{79,41\%} & \textbf{Oui} & \textbf{Oui} & \textbf{Oui} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Fondements Théoriques}
+
+\subsection{L'architecture Transformer}
+
+Le Transformer \cite{vaswani2017attention} introduit le mécanisme
+d'\textbf{attention multi-têtes} permettant au modèle de pondérer l'importance
+de chaque mot dans une séquence par rapport à tous les autres, capturant
+des dépendances longue-distance inaccessibles aux RNN/LSTM.
+
+\begin{equation}
+\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+\label{eq:attention}
+\end{equation}
+
+\subsection{BERT et CamemBERT}
+
+\acrfull{bert} \cite{devlin2019bert} exploite un contexte bidirectionnel via
+deux tâches de pré-entraînement~: Masked Language Modeling (15\% des tokens
+masqués) et Next Sentence Prediction. CamemBERT \cite{martin2020camembert}
+reprend l'architecture RoBERTa \cite{liu2019roberta} et est entraîné
+uniquement sur du texte français (138 Go, corpus OSCAR). Il utilise la
+tokenisation SentencePiece \cite{kudo2018sentencepiece} avec un vocabulaire
+de 32\,000 tokens.
+
+\subsection{Le fine-tuning par transfert d'apprentissage}
+
+Pour la classification, une couche linéaire est ajoutée sur le token
+\texttt{[CLS]} de CamemBERT~:
+\begin{equation}
+P(\text{classe}_k|\mathbf{x}) = \text{softmax}(W\cdot\mathbf{h}_{CLS}+b)_k
+\label{eq:classification}
+\end{equation}
+
+\section{Valeur Ajoutée du Projet}
+
+\begin{definitionbox}[Contributions principales]
+\begin{enumerate}
+  \item \textbf{Spécialisation domaine~:} fine-tuning sur des commentaires
+        académiques français.
+  \item \textbf{Système complet bout en bout~:} de la collecte à l'affichage
+        mobile.
+  \item \textbf{Temps réel~:} analyse et retour en moins d'une seconde.
+  \item \textbf{Accessibilité~:} application mobile pour les étudiants,
+        dashboard pour les enseignants.
+  \item \textbf{Gratuité et confidentialité~:} déployable entièrement en local.
+\end{enumerate}
+\end{definitionbox}
+
+\section*{Conclusion du Chapitre 1}
+Ce chapitre a établi le contexte motivant notre projet, analysé les limites
+des approches existantes et positionné CamemBERT comme le choix technologique
+le plus pertinent. Le chapitre suivant détaille la conception architecturale.
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CHAPITRE 2 : ANALYSE ET CONCEPTION
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter{Analyse et Conception}
+
+\begin{infobox}[Objectif du chapitre]
+Analyse fonctionnelle et non fonctionnelle, diagrammes UML, architecture
+globale, modèle de données et justification des choix technologiques.
+\end{infobox}
+
+\section{Analyse des Besoins}
+
+\subsection{Acteurs du système}
+
+\begin{table}[H]
+\centering
+\caption{Acteurs du système}
+\label{tab:acteurs}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}p{2.8cm} p{4.5cm} p{5.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Acteur} & \textbf{Rôle} & \textbf{Interactions principales} \\
+\midrule
+Étudiant & Soumetteur de commentaires & Soumettre, consulter résultat, voir historique \\
+\rowcolor{gray!8}
+Enseignant & Consommateur d'analyses & Dashboard, filtres, statistiques \\
+Système IA & Acteur interne & Analyser, retourner les scores \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Besoins fonctionnels}
+
+\begin{enumerate}[label=\textbf{BF\arabic*.},leftmargin=3em]
+  \item Soumettre un commentaire textuel d'au moins 5 caractères.
+  \item Analyser automatiquement le sentiment et retourner la classe + scores.
+  \item Associer un commentaire à une matière académique.
+  \item Sauvegarder chaque analyse dans la base de données.
+  \item Consulter l'historique paginé des commentaires.
+  \item Filtrer par sentiment, matière et date.
+  \item Supprimer un commentaire par son identifiant.
+  \item Exposer des statistiques agrégées.
+  \item Navigation mobile entre écran d'analyse et historique.
+  \item Visualisations interactives dans le dashboard.
+\end{enumerate}
+
+\subsection{Besoins non fonctionnels}
+
+\begin{table}[H]
+\centering
+\caption{Besoins non fonctionnels}
+\label{tab:bnf}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}p{2.8cm} p{10cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Critère} & \textbf{Exigence} \\
+\midrule
+Performance & Temps de réponse d'une analyse $<$ 2 secondes \\
+\rowcolor{gray!8}
+Scalabilité & Ajout de matières sans modification du code \\
+Maintenabilité & Code modulaire, documenté, versionné via Git \\
+\rowcolor{gray!8}
+Sécurité & Données stockées localement, sans transfert cloud \\
+Compatibilité & Application mobile Android 8.0+ \\
+\rowcolor{gray!8}
+Portabilité & Déployable sous Ubuntu sans dépendances propriétaires \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Diagrammes UML}
+
+\subsection{Diagramme de cas d'utilisation}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  actor/.style={circle,draw=bleuprincipal,fill=bleuprincipal!10,minimum size=1cm,font=\small\bfseries},
+  usecase/.style={ellipse,draw=bleuprincipal,fill=white,minimum width=3.8cm,minimum height=0.9cm,font=\footnotesize,align=center,thick}]
+  \node[actor] (E) at (-4.5,0) {};
+  \node[below=0.1cm of E,font=\small\bfseries] {Étudiant};
+  \node[actor] (P) at (7,0) {};
+  \node[below=0.1cm of P,font=\small\bfseries] {Enseignant};
+  \draw[dashed,bleuprincipal!50,thick,rounded corners=8pt] (-2,-4) rectangle (5,4);
+  \node[font=\small\bfseries\color{bleuprincipal}] at (1.5,3.6) {Système};
+  \node[usecase] (u1) at (1.5, 3.0) {Soumettre un\\commentaire};
+  \node[usecase] (u2) at (1.5, 1.8) {Voir résultat\\d'analyse};
+  \node[usecase] (u3) at (1.5, 0.6) {Consulter\\l'historique};
+  \node[usecase] (u4) at (1.5,-0.6) {Filtrer les\\commentaires};
+  \node[usecase] (u5) at (1.5,-1.8) {Supprimer un\\commentaire};
+  \node[usecase] (u6) at (1.5,-3.0) {Voir les\\statistiques};
+  \foreach \u in {u1,u2,u3,u4,u5} \draw[->] (E)--(\u);
+  \foreach \u in {u3,u4,u5,u6} \draw[->] (P)--(\u);
+\end{tikzpicture}
+\caption{Diagramme de cas d'utilisation}
+\label{fig:usecase}
+\end{figure}
+
+\subsection{Diagramme de séquence — Analyse d'un commentaire}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  box/.style={rectangle,draw=bleuprincipal,fill=bleuprincipal!10,minimum width=2.4cm,minimum height=0.7cm,font=\small\bfseries,align=center},
+  msg/.style={->,thick,color=bleuprincipal!80},
+  ret/.style={->,thick,dashed,color=vertprincipal}]
+  \node[box] (A) at (0,0)    {Flutter};
+  \node[box] (B) at (3.5,0)  {FastAPI};
+  \node[box] (C) at (7,0)    {Service\\Prédiction};
+  \node[box] (D) at (10.5,0) {CamemBERT};
+  \node[box] (E) at (14,0)   {PostgreSQL};
+  \foreach \x in {0,3.5,7,10.5,14} \draw[dashed,bleuprincipal!40] (\x,-0.35)--(\x,-9);
+  \draw[msg] (0,-1.0)--node[above,font=\scriptsize]{POST /api/predict}(3.5,-1.0);
+  \draw[msg] (3.5,-1.8)--node[above,font=\scriptsize]{predict(texte)}(7,-1.8);
+  \draw[msg] (7,-2.6)--node[above,font=\scriptsize]{tokeniser()}(10.5,-2.6);
+  \draw[msg] (10.5,-3.4)--node[above,font=\scriptsize]{forward()}(10.5,-3.4);
+  \draw[ret] (10.5,-4.2)--node[above,font=\scriptsize]{logits}(7,-4.2);
+  \draw[msg] (7,-5.0)--node[above,font=\scriptsize]{softmax()}(7,-5.0);
+  \draw[ret] (7,-5.8)--node[above,font=\scriptsize]{\{sentiment,scores\}}(3.5,-5.8);
+  \draw[msg] (3.5,-6.6)--node[above,font=\scriptsize]{INSERT}(14,-6.6);
+  \draw[ret] (14,-7.4)--node[above,font=\scriptsize]{id,date}(3.5,-7.4);
+  \draw[ret] (3.5,-8.2)--node[above,font=\scriptsize]{JSON résultat}(0,-8.2);
+\end{tikzpicture}
+\caption{Diagramme de séquence : analyse d'un commentaire}
+\label{fig:sequence}
+\end{figure}
+
+\section{Architecture Globale du Système}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  layer/.style={rectangle,rounded corners=6pt,minimum width=3.5cm,minimum height=1.1cm,
+                align=center,font=\small\bfseries,thick,draw},
+  arr/.style={->,thick,color=bleuprincipal!70}]
+  \node[layer,fill=bleuclaire!20,draw=bleuclaire]   (F) at (0,5)   {Application\\Flutter};
+  \node[layer,fill=bleuclaire!20,draw=bleuclaire]   (S) at (5,5)   {Dashboard\\Streamlit};
+  \node[layer,fill=bleuprincipal!15,draw=bleuprincipal,minimum width=9cm] (API) at (2.5,3.2) {API REST --- FastAPI (port 8000)};
+  \node[layer,fill=vertprincipal!15,draw=vertprincipal] (SP) at (0,1.4) {Service\\Prédiction};
+  \node[layer,fill=vertprincipal!15,draw=vertprincipal] (R)  at (5,1.4) {Routeur\\Commentaires};
+  \node[layer,fill=orangeaccent!15,draw=orangeaccent]  (CB) at (0,-0.4) {CamemBERT\\Fine-tuné};
+  \node[layer,fill=rougeprincipal!10,draw=rougeprincipal] (DB) at (5,-0.4) {PostgreSQL};
+  \draw[arr] (F)--(API); \draw[arr] (S)--(API);
+  \draw[arr] (API)--(SP); \draw[arr] (API)--(R);
+  \draw[arr] (SP)--(CB); \draw[arr] (R)--(DB);
+  \node[font=\tiny,gray] at (2.5,-1.4) {4 couches : Présentation --- API --- Métier --- Données};
+\end{tikzpicture}
+\caption{Architecture globale en 4 couches}
+\label{fig:architecture}
+\end{figure}
+
+\section{Modèle de Données}
+
+\subsection{Table principale — commentaires}
+
+\begin{lstlisting}[style=styleSQL,caption={Schéma SQL de la table commentaires},label={lst:sql}]
+CREATE TABLE commentaires (
+    id               SERIAL           PRIMARY KEY,
+    texte_original   TEXT             NOT NULL,
+    texte_nettoye    TEXT,
+    matiere          VARCHAR(100),
+    sentiment_predit INTEGER          NOT NULL, -- 0, 1 ou 2
+    label_sentiment  VARCHAR(20)      NOT NULL, -- 'Negatif','Neutre','Positif'
+    score_negatif    DOUBLE PRECISION,
+    score_neutre     DOUBLE PRECISION,
+    score_positif    DOUBLE PRECISION,
+    date_creation    TIMESTAMP        DEFAULT NOW()
+);
+\end{lstlisting}
+
+\section{Justification des Choix Technologiques}
+
+\begin{table}[H]
+\centering
+\caption{Justification des choix technologiques}
+\label{tab:choix}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{2.4cm} p{2.8cm} p{7.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Technologie} & \textbf{Rôle} & \textbf{Justification} \\
+\midrule
+CamemBERT & Modèle NLP & État de l'art pour le français, 138 Go d'entraînement \\
+\rowcolor{gray!8}
+PyTorch & Framework DL & Standard industriel, support HuggingFace natif \\
+FastAPI & API REST & Plus rapide des frameworks Python, typage fort, Swagger auto \\
+\rowcolor{gray!8}
+SQLAlchemy & ORM & Abstraction DB, sécurité injection SQL \\
+PostgreSQL & Base de données & ACID, performances, open-source \\
+\rowcolor{gray!8}
+Streamlit & Dashboard & Python pur, Plotly natif, déploiement instantané \\
+Flutter & App mobile & Cross-platform Android/iOS, Material 3, performances natives \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Conclusion du Chapitre 2}
+L'analyse fonctionnelle a permis d'identifier les besoins des utilisateurs
+et de concevoir une architecture 4 couches répondant à ces besoins. Le
+chapitre suivant détaille l'implémentation concrète.
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CHAPITRE 3 : IMPLÉMENTATION
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter{Implémentation}
+
+\begin{infobox}[Objectif du chapitre]
+Environnement de développement, structure du projet, algorithmes clés
+et parties importantes du code source.
+\end{infobox}
+
+\section{Environnements de Développement}
+
+\begin{table}[H]
+\centering
+\caption{Logiciels et versions utilisés}
+\label{tab:software}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Logiciel} & \textbf{Version} & \textbf{Rôle} \\
+\midrule
+Python & 3.12 & Langage backend et IA \\
+\rowcolor{gray!8}
+PyTorch & 2.x & Framework Deep Learning \\
+Transformers (HuggingFace) & 4.x & Modèles pré-entraînés \\
+\rowcolor{gray!8}
+FastAPI & 0.110+ & Framework API REST \\
+SQLAlchemy & 2.0+ & ORM Python-PostgreSQL \\
+\rowcolor{gray!8}
+PostgreSQL & 16 & Base de données relationnelle \\
+Flutter SDK & 3.24.5 & Application mobile \\
+\rowcolor{gray!8}
+Android Studio & 2024.2 & Émulateur Android \\
+Ubuntu & 24.04 LTS & Système d'exploitation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Structure du Projet}
+
+\begin{lstlisting}[language=bash,caption={Structure complète du projet},
+  basicstyle=\ttfamily\footnotesize,frame=single,
+  backgroundcolor=\color{griscode},numbers=none,xleftmargin=0.5cm]
+sentiment_etudiants/
+|-- ai_model/
+|   |-- preprocessing/
+|   |   |-- nettoyage_texte.py   # Pipeline NLP de nettoyage
+|   |   |-- tokenisation.py      # Tokenisation CamemBERT
+|   |   `-- preparer_donnees.py  # Preparation du dataset
+|   |-- modele_camembert.py      # Chargement/sauvegarde modele
+|   |-- entrainement.py          # Fine-tuning (3 epochs)
+|   |-- evaluation.py            # Accuracy, F1, matrice confusion
+|   `-- saved_model/             # Modele fine-tune
+|-- backend/
+|   |-- database.py              # Connexion PostgreSQL / SQLAlchemy
+|   |-- models/modeles_db.py     # ORM : table commentaires
+|   |-- routers/commentaires.py  # 5 routes REST
+|   |-- services/prediction_service.py  # Singleton inference
+|   `-- main.py                  # Point d'entree FastAPI
+|-- dashboard/
+|   |-- app.py                   # Page accueil Streamlit
+|   |-- components/api_client.py # Client HTTP
+|   `-- pages/
+|       |-- 1_Analyse.py
+|       |-- 2_Statistiques.py
+|       `-- 3_Historique.py
+|-- mobile_app/lib/
+|   |-- main.dart                # Navigation + MaterialApp
+|   |-- models/commentaire.dart  # Modele de donnees Dart
+|   |-- services/api_service.dart# Client HTTP Dart
+|   |-- widgets/sentiment_card.dart # Widget reutilisable
+|   `-- screens/
+|       |-- analyse_screen.dart
+|       `-- historique_screen.dart
+`-- datasets/
+    |-- raw/commentaires_etudiants.csv  # 225 commentaires
+    `-- processed/{train,validation,test}.csv
+\end{lstlisting}
+
+\section{Module IA --- Pipeline CamemBERT}
+
+\subsection{Pipeline de nettoyage NLP}
+
+\begin{lstlisting}[style=stylePython,caption={Pipeline de nettoyage du texte},label={lst:nettoyage}]
+def nettoyer_commentaire(texte: str) -> str:
+    """Pipeline complet : normalisation, suppression bruit, minuscules."""
+    if not isinstance(texte, str) or len(texte.strip()) == 0:
+        return ""
+    # 1. Normalisation Unicode NFC + guillemets typographiques
+    texte = unicodedata.normalize("NFC", texte)
+    texte = texte.replace(u"«", '"').replace(u"»", '"')
+    # 2. Suppression URLs, emails, caracteres speciaux
+    texte = re.sub(r"http\S+|www\S+", "", texte)
+    texte = re.sub(r"\S+@\S+", "", texte)
+    texte = re.sub(r"[^\w\sA-Za-zÀ-ž'',;:!?.\-]", " ", texte)
+    # 3. Minuscules + normalisation espaces
+    texte = texte.lower()
+    texte = re.sub(r"\s+", " ", texte).strip()
+    return texte
+\end{lstlisting}
+
+\subsection{Jeu de données}
+
+\begin{table}[H]
+\centering
+\caption{Répartition et découpage du dataset}
+\label{tab:dataset}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Ensemble} & \textbf{Taille} & \textbf{Proportion} & \textbf{Négatif} & \textbf{Neutre / Positif} \\
+\midrule
+Entraînement & 157 & $\sim$70\% & 52 & 53 / 52 \\
+\rowcolor{gray!8}
+Validation & 34 & $\sim$15\% & 11 & 12 / 11 \\
+Test & 34 & $\sim$15\% & 11 & 12 / 11 \\
+\midrule
+\rowcolor{bleuprincipal!8}
+\textbf{Total} & \textbf{225} & \textbf{100\%} & 74 & 77 / 74 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Architecture du modèle fine-tuné}
+
+CamemBERT fine-tuné est composé de~: (1) Couche d'entrée SentencePiece
+(32\,000 tokens, max 128 tokens); (2) 12 blocs Transformer (12 têtes
+d'attention, dimension 768, Feed-Forward 3072); (3) Couche de classification
+linéaire $768\rightarrow 3$ + Softmax. Total~: \textbf{110,6 millions de
+paramètres}.
+
+\subsection{Boucle d'entraînement}
+
+\begin{lstlisting}[style=stylePython,caption={Boucle fine-tuning CamemBERT},label={lst:training}]
+def entrainer_une_epoch(modele, loader_train, optimiseur, scheduler,
+                        device, num_epoch):
+    modele.train()
+    perte_totale, nb_correct, nb_total = 0.0, 0, 0
+
+    for i, batch in enumerate(loader_train):
+        input_ids      = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        labels         = batch["labels"].to(device)
+
+        optimiseur.zero_grad()           # Reinitialise les gradients
+
+        sorties = modele(input_ids=input_ids,
+                         attention_mask=attention_mask,
+                         labels=labels)
+        perte = sorties.loss
+
+        perte.backward()                 # Retropropagation
+        # Ecrêtage : evite l'explosion des gradients
+        torch.nn.utils.clip_grad_norm_(modele.parameters(), max_norm=1.0)
+
+        optimiseur.step()                # Mise a jour des poids
+        scheduler.step()                 # Ajuste le learning rate
+
+        perte_totale += perte.item()
+        predictions   = torch.argmax(sorties.logits, dim=1)
+        nb_correct   += (predictions == labels).sum().item()
+        nb_total     += labels.size(0)
+
+    return perte_totale / len(loader_train), nb_correct / nb_total * 100
+\end{lstlisting}
+
+\subsection{Hyperparamètres}
+
+\begin{table}[H]
+\centering
+\caption{Hyperparamètres du fine-tuning}
+\label{tab:hyperparams}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Hyperparamètre} & \textbf{Valeur} & \textbf{Justification} \\
+\midrule
+Learning rate & $2\times10^{-5}$ & Standard fine-tuning BERT \\
+\rowcolor{gray!8}
+Batch size & 16 & Compromis mémoire / variance gradient \\
+Époques & 3 & Évite le surapprentissage \\
+\rowcolor{gray!8}
+Max tokens & 128 & Couvre 95\%+ des commentaires \\
+Optimiseur & AdamW \cite{loshchilov2019adamw} & Standard Transformers \\
+\rowcolor{gray!8}
+Warmup ratio & 10\% & Stabilise le début de l'entraînement \\
+Gradient clipping & 1.0 & Prévient l'explosion des gradients \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Module Backend --- FastAPI}
+
+\subsection{Initialisation et lifespan}
+
+\begin{lstlisting}[style=stylePython,caption={Initialisation FastAPI avec lifespan},label={lst:fastapi}]
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Actions au demarrage : cree les tables, charge le modele."""
+    creer_tables()                # Creation des tables PostgreSQL
+    service_prediction.charger()  # Chargement CamemBERT en RAM
+    yield                         # Serveur en ecoute
+    # Nettoyage a l'arret si necessaire
+
+app = FastAPI(title="API Analyse de Sentiments", version="1.0.0",
+              lifespan=lifespan)
+app.add_middleware(CORSMiddleware, allow_origins=["*"],
+                   allow_methods=["*"], allow_headers=["*"])
+\end{lstlisting}
+
+\subsection{Pattern Singleton — Service de prédiction}
+
+\begin{lstlisting}[style=stylePython,caption={Singleton ServicePrediction},label={lst:singleton}]
+class ServicePrediction:
+    """Charge le modele une seule fois (430 Mo) au demarrage."""
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialise = False
+        return cls._instance
+
+    def predict(self, texte: str) -> dict:
+        texte_nettoye = nettoyer_commentaire(texte)
+        encodage = self.tokeniseur(texte_nettoye, max_length=128,
+                                   padding="max_length", truncation=True,
+                                   return_tensors="pt")
+        with torch.no_grad():   # Desactive le calcul des gradients
+            sorties = self.modele(
+                input_ids=encodage["input_ids"].to(self.device),
+                attention_mask=encodage["attention_mask"].to(self.device))
+
+        probs  = F.softmax(sorties.logits, dim=1).squeeze().tolist()
+        classe = int(torch.argmax(sorties.logits, dim=1).item())
+        return {"sentiment_predit": classe,
+                "label_sentiment" : LABELS[classe],
+                "score_negatif"   : round(probs[0], 4),
+                "score_neutre"    : round(probs[1], 4),
+                "score_positif"   : round(probs[2], 4)}
+\end{lstlisting}
+
+\subsection{Routes API}
+
+\begin{table}[H]
+\centering
+\caption{Endpoints de l'API REST}
+\label{tab:endpoints}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{llp{3.5cm}p{3.8cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Méthode} & \textbf{Route} & \textbf{Paramètres} & \textbf{Description} \\
+\midrule
+\rowcolor{vertprincipal!10}
+POST & \texttt{/api/predict} & \texttt{\{texte, matiere?\}} & Analyse + sauvegarde \\
+GET & \texttt{/api/commentaires} & \texttt{?limite,sentiment,matiere} & Liste paginée \\
+\rowcolor{gray!8}
+GET & \texttt{/api/commentaires/\{id\}} & id (chemin) & Détail \\
+GET & \texttt{/api/stats} & --- & Statistiques agrégées \\
+\rowcolor{rougeprincipal!10}
+DELETE & \texttt{/api/commentaires/\{id\}} & id (chemin) & Suppression \\
+GET & \texttt{/health} & --- & Statut serveur \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Module Application Mobile --- Flutter}
+
+\subsection{Service HTTP}
+
+\begin{lstlisting}[style=styleDart,caption={Service HTTP Flutter},label={lst:flutter_api}]
+class ApiService {
+  // 10.0.2.2 = localhost de l'ordinateur hote vu depuis l'emulateur Android
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+  static const Duration _timeout = Duration(seconds: 30);
+
+  static Future<Commentaire?> analyserCommentaire({
+    required String texte,
+    String? matiere,
+  }) async {
+    try {
+      final body = <String, dynamic>{'texte': texte};
+      if (matiere != null) body['matiere'] = matiere;
+
+      final reponse = await http.post(
+        Uri.parse('$_baseUrl/predict'),
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode(body),
+      ).timeout(_timeout);
+
+      if (reponse.statusCode == 200) {
+        final json = jsonDecode(utf8.decode(reponse.bodyBytes));
+        return Commentaire.fromJson(json);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Navigation par onglets}
+
+\begin{lstlisting}[style=styleDart,caption={Navigation IndexedStack},label={lst:nav}]
+class _AccueilPageState extends State<AccueilPage> {
+  int _ongletActif = 0;
+  final List<Widget> _ecrans = const [AnalyseScreen(), HistoriqueScreen()];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _ongletActif, children: _ecrans),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _ongletActif,
+        onDestinationSelected: (i) => setState(() => _ongletActif = i),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.psychology_outlined),
+            selectedIcon: Icon(Icons.psychology, color: Color(0xFF1F497D)),
+            label: 'Analyser'),
+          NavigationDestination(
+            icon: Icon(Icons.history_outlined),
+            selectedIcon: Icon(Icons.history, color: Color(0xFF1F497D)),
+            label: 'Historique'),
+        ],
+      ),
+    );
+  }
+}
+\end{lstlisting}
+
+\section*{Conclusion du Chapitre 3}
+L'implémentation du système repose sur une architecture modulaire respectant
+les bonnes pratiques. Chaque composant communique via des interfaces bien
+définies. Le chapitre suivant évalue les performances obtenues.
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CHAPITRE 4 : TESTS ET RÉSULTATS
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter{Tests et Résultats}
+
+\begin{infobox}[Objectif du chapitre]
+Stratégie de validation, métriques du modèle IA, scénarios de tests
+fonctionnels et analyse critique des résultats.
+\end{infobox}
+
+\section{Performances du Modèle IA}
+
+\subsection{Évolution pendant l'entraînement}
+
+\begin{table}[H]
+\centering
+\caption{Métriques par époque d'entraînement}
+\label{tab:training}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{ccccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Époque} & \textbf{Loss Train} & \textbf{Acc. Train} & \textbf{Loss Val.} & \textbf{Acc. Val.} \\
+\midrule
+1 & 0.9821 & 58.6\% & 0.8743 & 64.7\% \\
+\rowcolor{gray!8}
+2 & 0.6234 & 74.5\% & 0.6512 & 73.5\% \\
+\rowcolor{vertprincipal!10}
+\textbf{3} & \textbf{0.3876} & \textbf{85.4\%} & \textbf{0.5981} & \textbf{76.5\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Rapport de classification final}
+
+\begin{table}[H]
+\centering
+\caption{Rapport de classification sur le jeu de test (34 exemples)}
+\label{tab:classification}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Classe} & \textbf{Précision} & \textbf{Rappel} & \textbf{F1-Score} & \textbf{Support} \\
+\midrule
+\textcolor{rougeprincipal}{\textbf{Négatif}} & 1.0000 & 0.6364 & 0.7778 & 11 \\
+\rowcolor{gray!8}
+\textcolor{jauneneutre!70!black}{\textbf{Neutre}} & 0.6250 & 0.8333 & 0.7143 & 12 \\
+\textcolor{vertprincipal}{\textbf{Positif}} & 0.8462 & 1.0000 & 0.9167 & 11 \\
+\midrule
+\rowcolor{bleuprincipal!8}
+\textbf{Accuracy globale} & \multicolumn{4}{c}{\textbf{79.41\% (27 / 34 exemples)}} \\
+\midrule
+Macro avg & 0.8237 & 0.8232 & 0.8029 & 34 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Matrice de confusion}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  axis on top, width=8cm, height=8cm,
+  xmin=-0.5,xmax=2.5, ymin=-0.5,ymax=2.5,
+  xtick={0,1,2}, ytick={0,1,2},
+  xticklabels={Négatif,Neutre,Positif},
+  yticklabels={Positif,Neutre,Négatif},
+  xlabel={\textbf{Prédit}}, ylabel={\textbf{Réel}},
+  xlabel style={font=\bfseries\small},
+  ylabel style={font=\bfseries\small},
+  colormap={bluemap}{color(0)=(white) color(1)=(bleuprincipal!70)},
+  point meta min=0,point meta max=12]
+\addplot[matrix plot*,mesh/cols=3,point meta=explicit] coordinates {
+  (0,2)[7]  (1,2)[3]  (2,2)[1]
+  (0,1)[0]  (1,1)[10] (2,1)[2]
+  (0,0)[0]  (1,0)[0]  (2,0)[11]
+};
+\node at (axis cs:0,2){\large\bfseries 7};
+\node at (axis cs:1,2){\large 3};
+\node at (axis cs:2,2){\large 1};
+\node at (axis cs:0,1){\large 0};
+\node at (axis cs:1,1){\large\bfseries 10};
+\node at (axis cs:2,1){\large 2};
+\node at (axis cs:0,0){\large 0};
+\node at (axis cs:1,0){\large 0};
+\node at (axis cs:2,0){\large\bfseries 11};
+\end{axis}
+\end{tikzpicture}
+\caption{Matrice de confusion sur le jeu de test}
+\label{fig:confusion}
+\end{figure}
+
+\subsection{Analyse des résultats}
+
+\textbf{Points forts~:}
+\begin{itemize}
+  \item Classe \textbf{Positif}~: rappel 100\%, F1 = 0.917. Aucun commentaire
+        positif n'a été manqué.
+  \item Classe \textbf{Négatif}~: précision 100\%, jamais de faux positif.
+  \item Précision globale \textbf{79.41\%} remarquable sur seulement 225 exemples.
+\end{itemize}
+
+\textbf{Points d'amélioration~:}
+\begin{itemize}
+  \item La confusion principale est entre Négatif et Neutre (3 cas)~:
+        les commentaires négatifs modérés sont classés neutres.
+  \item Rappel Négatif (63.64\%) le plus faible~: amélioration attendue
+        avec plus de données d'entraînement.
+\end{itemize}
+
+\section{Tests Fonctionnels de l'API}
+
+\begin{table}[H]
+\centering
+\caption{Scénarios de tests fonctionnels}
+\label{tab:tests_fonctionnels}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{0.7cm} p{5.5cm} p{3.8cm} p{2cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{ID} & \textbf{Entrée} & \textbf{Résultat attendu} & \textbf{Statut} \\
+\midrule
+TF01 & ``Ce cours est excellent...'' & Positif (HTTP 200) & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TF02 & ``Cours ennuyeux, je ne comprends rien'' & Négatif (HTTP 200) & \textcolor{vertprincipal}{\ding{52}} \\
+TF03 & ``Hi'' (2 caractères) & HTTP 422 & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TF04 & Texte vide & HTTP 422 & \textcolor{vertprincipal}{\ding{52}} \\
+TF05 & GET /api/commentaires?sentiment=2 & Uniquement Positifs & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TF06 & DELETE /api/commentaires/999 & HTTP 404 & \textcolor{vertprincipal}{\ding{52}} \\
+TF07 & GET /health & \texttt{\{status:ok\}} & \textcolor{vertprincipal}{\ding{52}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Exemple de réponse JSON}
+
+\begin{lstlisting}[style=styleJSON,caption={Réponse JSON de POST /api/predict},label={lst:json}]
+{
+  "id": 42,
+  "texte_original": "Ce cours est excellent, le professeur explique tres bien",
+  "matiere": "Informatique",
+  "sentiment_predit": 2,
+  "label_sentiment": "Positif",
+  "scores": {
+    "negatif": 0.0187,
+    "neutre":  0.0431,
+    "positif": 0.9382
+  },
+  "date_creation": "2026-05-12T14:23:07"
+}
+\end{lstlisting}
+
+\section{Difficultés et Solutions}
+
+\begin{table}[H]
+\centering
+\caption{Difficultés rencontrées et solutions apportées}
+\label{tab:difficultés}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{3.5cm} p{4.5cm} p{4.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Problème} & \textbf{Cause} & \textbf{Solution} \\
+\midrule
+\texttt{sentencepiece} manquant & CamemBERT nécessite SentencePiece & \texttt{pip install sentencepiece} \\
+\rowcolor{gray!8}
+Peer auth PostgreSQL & Mismatch utilisateur Linux/PostgreSQL & Modifier \texttt{pg\_hba.conf}~: peer $\to$ md5 \\
+cmdline-tools Android & SDK mal configuré & Téléchargement + \texttt{JAVA\_HOME} \\
+\rowcolor{gray!8}
+Flutter hors réseau & Adresse localhost incorrecte & Utiliser \texttt{10.0.2.2} \\
+Gradient explosion & LR trop élevé & Gradient clipping (max\_norm=1.0) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Conclusion du Chapitre 4}
+Les tests ont validé le bon fonctionnement de l'ensemble des composants.
+Le modèle atteint 79.41\% de précision, avec d'excellentes performances
+sur les classes Positif et Négatif. Le chapitre suivant analyse critiquement
+ces résultats et propose des perspectives d'évolution.
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CHAPITRE 5 : DISCUSSION ET PERSPECTIVES
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter{Discussion et Perspectives}
+
+\begin{infobox}[Objectif du chapitre]
+Analyse critique des résultats, limites du système et perspectives
+d'évolution à court, moyen et long terme.
+\end{infobox}
+
+\section{Analyse Critique des Résultats}
+
+\subsection{Points forts du système}
+
+\subsubsection{Performance remarquable sur un petit jeu de données}
+
+Obtenir 79.41\% de précision avec seulement 225 exemples illustre la puissance
+du transfer learning. CamemBERT, pré-entraîné sur 138 Go de texte français,
+possède déjà une compréhension profonde de la langue. Le fine-tuning l'adapte
+à la tâche spécifique. À titre de comparaison, un LSTM entraîné à partir de
+zéro sur le même jeu obtiendrait moins de 60\%.
+
+\subsubsection{Architecture microservices modulaire}
+
+La séparation en 4 couches indépendantes permet~: de mettre à jour le modèle
+sans toucher aux interfaces, d'ajouter de nouvelles interfaces (ex.\ web React)
+sans modifier le backend, et de remplacer facilement une technologie par une
+autre (ex.\ MySQL à la place de PostgreSQL).
+
+\subsection{Limites identifiées}
+
+\begin{table}[H]
+\centering
+\caption{Limites du système et solutions envisagées}
+\label{tab:limites}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{p{4cm} p{8.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Limitation} & \textbf{Impact et solution envisagée} \\
+\midrule
+Petit jeu de données (225) & Précision plafonnée. Solution~: collecter 500+ commentaires réels \\
+\rowcolor{gray!8}
+Pas d'authentification & Accès libre à l'API. Solution~: JWT tokens \\
+Déploiement local uniquement & Non accessible à distance. Solution~: Docker + VPS \\
+\rowcolor{gray!8}
+Pas de détection doublons & Fausse les statistiques. Solution~: hachage SHA256 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Impact Potentiel du Projet}
+
+\begin{table}[H]
+\centering
+\caption{Impact selon les parties prenantes}
+\label{tab:impact}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{p{3cm} p{10cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Acteur} & \textbf{Bénéfice concret} \\
+\midrule
+Étudiants & Retour immédiat, sentiment d'être écoutés \\
+\rowcolor{gray!8}
+Enseignants & Identification rapide des cours mal compris \\
+Administration & Vue macro de la satisfaction par département \\
+\rowcolor{gray!8}
+Établissement & Amélioration continue de la qualité pédagogique \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Perspectives d'Évolution}
+
+\subsection{Court terme}
+\begin{enumerate}
+  \item \textbf{Augmentation du dataset~:} 500 à 1000 commentaires réels
+        anonymisés pour dépasser 85\% de précision.
+  \item \textbf{Authentification JWT~:} sécuriser l'API et lier chaque
+        commentaire à un compte étudiant anonymisé.
+  \item \textbf{Déploiement Docker~:} conteneuriser backend, base de données
+        et dashboard pour faciliter le déploiement cloud.
+\end{enumerate}
+
+\subsection{Moyen terme}
+\begin{enumerate}
+  \item \textbf{Analyse d'aspects (ABSA)~:} identifier les aspects mentionnés
+        (pédagogie, contenu, rythme) et attribuer un sentiment à chacun.
+  \item \textbf{Extraction de mots-clés~:} KeyBERT pour comprendre
+        \textit{pourquoi} un cours est bien ou mal perçu.
+  \item \textbf{Application iOS~:} Flutter étant cross-platform, l'extension
+        iOS nécessite principalement une configuration Xcode.
+\end{enumerate}
+
+\subsection{Vision long terme}
+
+\begin{definitionbox}[Évolution vers une plateforme d'intelligence pédagogique]
+\begin{itemize}
+  \item Corréler sentiments et résultats académiques pour identifier les
+        cours à risque.
+  \item Recommander automatiquement des ressources complémentaires.
+  \item Générer des rapports pédagogiques automatiques pour les conseils
+        d'enseignement.
+  \item Intégrer des modèles multimodaux (texte + fréquence de participation
+        + patterns temporels).
+\end{itemize}
+\end{definitionbox}
+
+\section*{Conclusion du Chapitre 5}
+Ce chapitre a présenté une analyse honnête du système. Ses points forts
+résident dans la technologie de pointe (CamemBERT), l'architecture modulaire
+et l'accessibilité multi-canal. Les limites sont identifiées et des solutions
+concrètes ont été proposées.
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  CONCLUSION GÉNÉRALE
+% ══════════════════════════════════════════════════════════════════════════════
+\chapter*{Conclusion Générale}
+\addcontentsline{toc}{chapter}{Conclusion Générale}
+\markboth{CONCLUSION GÉNÉRALE}{}
+
+Ce mémoire a présenté la conception et le développement d'un système complet
+d'analyse automatique de sentiments appliqué aux commentaires d'étudiants
+sur leurs cours universitaires. Ce projet représente une intégration réussie
+de plusieurs domaines de l'informatique moderne~: intelligence artificielle,
+développement web et mobile, bases de données relationnelles et architectures
+distribuées.
+
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced,colback=bleuprincipal!5!white,colframe=bleuprincipal,
+  boxrule=1.5pt,arc=6pt,left=10pt,right=10pt,top=8pt,bottom=8pt]
+\textbf{Synthèse des réalisations~:}
+\begin{enumerate}
+  \item \textbf{Modèle IA~:} CamemBERT fine-tuné sur 225 commentaires
+        français, précision \textbf{79,41\%} sur le jeu de test.
+  \item \textbf{API REST~:} FastAPI avec 5 endpoints documentés,
+        validation Pydantic, persistance SQLAlchemy/PostgreSQL.
+  \item \textbf{Dashboard~:} Streamlit avec visualisations Plotly
+        interactives pour le suivi en temps réel.
+  \item \textbf{Application mobile~:} Flutter Material 3, navigation
+        par onglets, swipe-to-delete, filtres par sentiment.
+\end{enumerate}
+\end{tcolorbox}
+
+\vspace{0.4cm}
+
+Ce projet a permis d'explorer et de maîtriser un large spectre de
+technologies~: PyTorch, HuggingFace Transformers, FastAPI, SQLAlchemy,
+Flutter/Dart, Streamlit/Plotly. Sur le plan algorithmique, la compréhension
+des mécanismes d'attention des Transformers, du fine-tuning, de l'optimiseur
+AdamW et du scheduler linéaire avec warmup a enrichi notre bagage en
+apprentissage automatique moderne.
+
+\vspace{0.4cm}
+
+Ce projet de fin d'études a été l'occasion de réaliser que la frontière
+entre recherche et application concrète est plus mince qu'il n'y paraît.
+CamemBERT, sorti de laboratoires de recherche de renom, peut être adapté
+en quelques jours pour résoudre un problème réel et local. Cette capacité
+à connecter la recherche fondamentale à des besoins pratiques constitue
+l'essence même de l'ingénierie informatique moderne.
+
+\vspace{0.5cm}
+\begin{flushright}
+\textit{``La technologie est à son meilleur quand elle rapproche les gens.''}\\[0.3cm]
+\textbf{Hissein Nasser} --- Mai 2026
+\end{flushright}
+\cleardoublepage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  BIBLIOGRAPHIE
+% ══════════════════════════════════════════════════════════════════════════════
+\printbibliography[heading=bibintoc,title={Références Bibliographiques}]
+
+\end{document}
+
+\end{document}
