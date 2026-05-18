@@ -1,0 +1,111 @@
+% ==============================================================================
+% PAGE DE GARDE
+% ==============================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+
+\begin{tikzpicture}[remember picture, overlay]
+  % Bande supérieure bleue
+  \fill[bleuprincipal] (current page.north west) rectangle
+    ([yshift=-3.5cm]current page.north east);
+  % Bande inférieure
+  \fill[bleuprincipal!80!black] (current page.south west) rectangle
+    ([yshift=1.8cm]current page.south east);
+  % Bande latérale gauche
+  \fill[vertprincipal] ([xshift=0cm]current page.north west) rectangle
+    ([xshift=0.8cm]current page.south west);
+  % Filet de séparation
+  \fill[jauneneutre] ([xshift=0.8cm]current page.north west) rectangle
+    ([xshift=1.1cm]current page.south west);
+\end{tikzpicture}
+
+\vspace*{0.5cm}
+\begin{center}
+
+% ── Logo / Établissement ──────────────────────────────────────────────────────
+{\color{white}\Large\bfseries UNIVERSITÉ — DÉPARTEMENT INFORMATIQUE}\\[0.3cm]
+{\color{white!80!gray}\large Filière : Génie Informatique}\\[0.2cm]
+{\color{white!80!gray}\normalsize Option : Intelligence Artificielle \& Génie Logiciel}
+
+\vspace{1.5cm}
+\hrule height 1pt \relax
+\vspace{0.3cm}
+{\color{bleuprincipal!30!black}\small MÉMOIRE DE FIN D'ÉTUDES}\\
+{\color{bleuprincipal!30!black}\small Pour l'obtention du diplôme de Licence / Master en Informatique}
+\vspace{0.3cm}
+\hrule height 1pt \relax
+
+\vspace{1.8cm}
+
+% ── Titre ─────────────────────────────────────────────────────────────────────
+\begin{tcolorbox}[
+  enhanced,
+  colback=bleuprincipal!10!white,
+  colframe=bleuprincipal,
+  boxrule=2pt,
+  arc=8pt,
+  left=12pt, right=12pt, top=10pt, bottom=10pt,
+  width=14cm
+]
+\begin{center}
+{\huge\bfseries\color{bleuprincipal}
+Système d'Analyse de\\[0.3em]
+Sentiments des\\[0.3em]
+Commentaires Étudiants\\[0.3em]
+en Temps Réel
+}\\[0.8em]
+{\large\color{gray}
+Basé sur le modèle CamemBERT, FastAPI, PostgreSQL et Flutter
+}
+\end{center}
+\end{tcolorbox}
+
+\vspace{2cm}
+
+% ── Auteur et encadreur ───────────────────────────────────────────────────────
+\begin{minipage}[t]{0.45\textwidth}
+\begin{flushleft}
+\textbf{\color{bleuprincipal}Réalisé par :}\\[0.5em]
+\large Hissein Nasser\\
+\small Étudiant en Informatique\\
+\small hisseinnasser2003@gmail.com
+\end{flushleft}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\begin{flushright}
+\textbf{\color{bleuprincipal}Encadré par :}\\[0.5em]
+\large M./Mme. [Nom Encadreur]\\
+\small Grade / Titre\\
+\small Département Informatique
+\end{flushright}
+\end{minipage}
+
+\vspace{2cm}
+
+% ── Technologies ──────────────────────────────────────────────────────────────
+\begin{tikzpicture}
+  \node[fill=bleuprincipal!10, rounded corners=5pt, inner sep=6pt] at (0,0)
+    {\small\color{bleuprincipal}\textbf{CamemBERT}};
+  \node[fill=vertprincipal!15, rounded corners=5pt, inner sep=6pt] at (3,0)
+    {\small\color{vertprincipal}\textbf{FastAPI}};
+  \node[fill=rougeprincipal!10, rounded corners=5pt, inner sep=6pt] at (6,0)
+    {\small\color{rougeprincipal}\textbf{PostgreSQL}};
+  \node[fill=bleuclaire!15, rounded corners=5pt, inner sep=6pt] at (9,0)
+    {\small\color{bleuclaire}\textbf{Flutter}};
+  \node[fill=orangeaccent!10, rounded corners=5pt, inner sep=6pt] at (1.5,-0.9)
+    {\small\color{orangeaccent}\textbf{PyTorch}};
+  \node[fill=bleuprincipal!10, rounded corners=5pt, inner sep=6pt] at (4.5,-0.9)
+    {\small\color{bleuprincipal}\textbf{Streamlit}};
+  \node[fill=vertprincipal!15, rounded corners=5pt, inner sep=6pt] at (7.5,-0.9)
+    {\small\color{vertprincipal}\textbf{SQLAlchemy}};
+\end{tikzpicture}
+
+\vspace{1.5cm}
+
+% ── Année académique ──────────────────────────────────────────────────────────
+{\color{white}\large\bfseries Année Académique 2025 -- 2026}
+
+\end{center}
+\end{titlepage}
+\cleardoublepage

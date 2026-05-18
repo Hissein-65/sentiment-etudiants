@@ -1,0 +1,130 @@
+% ==============================================================================
+% INTRODUCTION GÉNÉRALE
+% ==============================================================================
+\chapter*{Introduction Générale}
+\addcontentsline{toc}{chapter}{Introduction Générale}
+\markboth{INTRODUCTION GÉNÉRALE}{}
+
+\vspace{0.3cm}
+
+\begin{infobox}[Contexte de l'étude]
+L'essor du numérique dans l'enseignement supérieur génère chaque année
+des millions de retours étudiants. Traiter ces données manuellement est
+devenu impossible. L'intelligence artificielle offre une réponse concrète.
+\end{infobox}
+
+\vspace{0.5cm}
+
+\section*{Contexte général}
+
+L'enseignement supérieur moderne est caractérisé par un flux continu et
+croissant d'interactions entre enseignants et étudiants. Parmi celles-ci,
+les commentaires et retours d'expérience sur les cours constituent une
+source d'information précieuse pour améliorer la qualité pédagogique des
+enseignements. Cependant, la multiplication des effectifs étudiants et la
+diversification des modalités d'enseignement — notamment en ligne — ont
+rendu le traitement manuel de ces retours pratiquement impossible à grande
+échelle.
+
+Face à ce constat, l'analyse automatique de sentiments (\textit{Sentiment
+Analysis}) émerge comme une solution technologique particulièrement
+prometteuse. Discipline à l'intersection du \acrfull{taln}, de l'apprentissage
+automatique et de la linguistique computationnelle, elle permet d'identifier
+et de classifier automatiquement les opinions exprimées dans un texte, sans
+intervention humaine.
+
+\section*{Problématique}
+
+La langue française présente des défis spécifiques pour l'analyse
+automatique de sentiments : richesse morphologique, usage fréquent de la
+négation, expressions idiomatiques, niveaux de registre variés et présence
+d'accents. Ces particularités rendent inadéquates les approches développées
+pour l'anglais, et nécessitent des modèles spécialement adaptés à la langue
+française.
+
+Comment peut-on concevoir un système robuste, précis et accessible permettant
+d'analyser automatiquement et en temps réel les sentiments exprimés dans les
+commentaires d'étudiants en français, et de mettre ces analyses à la
+disposition des enseignants et des administrateurs de manière exploitable ?
+
+\section*{Solution proposée}
+
+Ce projet propose une réponse complète à cette problématique à travers
+le développement d'un système multi-couches intégrant :
+
+\begin{itemize}[leftmargin=2em]
+  \item[\textcolor{bleuprincipal}{\ding{118}}]
+    Un modèle d'\acrfull{ia} basé sur \textbf{CamemBERT}, architecture
+    Transformer pré-entraînée sur des milliards de tokens français, adaptée
+    par fine-tuning à la classification de sentiments étudiants en trois
+    catégories.
+
+  \item[\textcolor{vertprincipal}{\ding{118}}]
+    Un \textbf{serveur API RESTful} développé avec FastAPI, assurant
+    l'interface entre le modèle \acrshort{ia} et les applications
+    clientes, avec persistance des données dans PostgreSQL.
+
+  \item[\textcolor{orangeaccent}{\ding{118}}]
+    Un \textbf{tableau de bord analytique} Streamlit permettant aux
+    enseignants de suivre en temps réel les tendances de sentiment par
+    cours et par matière.
+
+  \item[\textcolor{rougeprincipal}{\ding{118}}]
+    Une \textbf{application mobile Android} Flutter offrant aux étudiants
+    une interface simple et moderne pour soumettre leurs commentaires depuis
+    n'importe où.
+\end{itemize}
+
+\section*{Objectifs du projet}
+
+L'objectif général de ce \acrfull{pfe} est de concevoir, développer et
+valider un système complet d'analyse de sentiments en temps réel pour les
+commentaires étudiants en langue française. De manière plus spécifique,
+ce projet vise à :
+
+\begin{enumerate}[leftmargin=2.5em]
+  \item Constituer et annoter un jeu de données de commentaires étudiants
+        en français, équilibré entre les classes de sentiment.
+  \item Fine-tuner le modèle CamemBERT pour la classification ternaire de
+        sentiments avec des performances acceptables.
+  \item Développer une API REST robuste et documentée exposant les
+        fonctionnalités du modèle.
+  \item Concevoir un tableau de bord analytique interactif pour la
+        visualisation des résultats.
+  \item Développer une application mobile multiplateforme permettant la
+        soumission et la consultation des analyses.
+  \item Évaluer les performances du système et identifier les pistes
+        d'amélioration.
+\end{enumerate}
+
+\section*{Organisation du mémoire}
+
+Ce mémoire est organisé en cinq chapitres, précédés d'une introduction et
+suivis d'une conclusion générale :
+
+\vspace{0.3em}
+\noindent\textbf{Chapitre 1 — Contexte et Problématique :} présente le
+contexte général de l'enseignement supérieur numérique, analyse les limites
+des approches existantes et justifie les choix technologiques retenus.
+
+\vspace{0.3em}
+\noindent\textbf{Chapitre 2 — Analyse et Conception :} détaille l'analyse
+fonctionnelle et non fonctionnelle du système, présente les diagrammes
+\acrshort{uml} et l'architecture globale, et justifie les choix techniques.
+
+\vspace{0.3em}
+\noindent\textbf{Chapitre 3 — Implémentation :} décrit en détail les
+environnements de développement, la structure du projet, les algorithmes
+clés et les extraits de code commentés des composants principaux.
+
+\vspace{0.3em}
+\noindent\textbf{Chapitre 4 — Tests et Résultats :} présente la stratégie
+de validation, les métriques de performance du modèle, les scénarios de
+test fonctionnels et l'analyse critique des résultats obtenus.
+
+\vspace{0.3em}
+\noindent\textbf{Chapitre 5 — Discussion et Perspectives :} propose une
+analyse critique du projet, identifie ses limites actuelles et trace les
+perspectives d'évolution futures.
+
+\cleardoublepage

@@ -1,0 +1,271 @@
+% ==============================================================================
+% CHAPITRE 1 : CONTEXTE ET PROBLÉMATIQUE
+% ==============================================================================
+\chapter{Contexte et Problématique}
+
+\begin{infobox}[Objectif du chapitre]
+Ce chapitre établit le cadre général de l'étude : le contexte éducatif
+numérique, la problématique du traitement des retours étudiants, l'étude
+des solutions existantes et la valeur ajoutée de notre approche.
+\end{infobox}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Contexte général : La Révolution Numérique dans l'Éducation}
+% ──────────────────────────────────────────────────────────────────────────────
+
+L'enseignement supérieur traverse une transformation profonde depuis
+l'avènement des technologies numériques. La massification de l'éducation
+universitaire, conjuguée à l'explosion des plateformes d'apprentissage en
+ligne (LMS — \textit{Learning Management Systems}), a multiplié
+exponentiellement les interactions numériques entre enseignants et étudiants.
+
+Selon plusieurs études pédagogiques récentes, un étudiant génère en moyenne
+plusieurs dizaines de commentaires, évaluations et retours textuels par
+semestre académique. À l'échelle d'un département ou d'une université,
+cela représente des milliers, voire des dizaines de milliers de textes à
+analyser chaque année.
+
+\subsection{L'importance du retour étudiant}
+
+Les retours des étudiants constituent un indicateur fondamental de la
+qualité pédagogique. Ils permettent aux enseignants d'identifier les points
+faibles de leurs cours, d'adapter leurs méthodes pédagogiques et d'améliorer
+l'expérience d'apprentissage. Pour les administrations universitaires, ces
+données agrégées fournissent une vision macroscopique de la satisfaction des
+apprenants et orientent les décisions d'investissement pédagogique.
+
+Cependant, la valeur réelle de ces données ne peut être exploitée que si
+elles sont analysées de manière systématique, objective et rapide. C'est
+précisément là que réside le défi technologique que ce projet s'efforce
+de relever.
+
+\subsection{Les limites du traitement manuel}
+
+Le traitement manuel des commentaires étudiants présente plusieurs
+limitations critiques, résumées dans le tableau \ref{tab:limites_manuel} :
+
+\begin{table}[H]
+\centering
+\caption{Limitations du traitement manuel des commentaires}
+\label{tab:limites_manuel}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}p{3.5cm} p{9cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Limitation} & \textbf{Impact sur la qualité pédagogique} \\
+\midrule
+Lenteur & Délai de plusieurs semaines avant exploitation, rendant les insights obsolètes \\
+\midrule
+\rowcolor{gray!8}
+Subjectivité & Interprétation variable selon l'analyste, biais cognitifs inconscients \\
+\midrule
+Coût élevé & Mobilisation de ressources humaines importantes pour une tâche répétitive \\
+\midrule
+\rowcolor{gray!8}
+Non scalable & Impossible à maintenir avec l'augmentation des effectifs \\
+\midrule
+Exhaustivité & Tendance à se concentrer sur les cas extrêmes, ignorant les nuances \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Problématique Détaillée}
+% ──────────────────────────────────────────────────────────────────────────────
+
+La problématique centrale de ce projet se décline en plusieurs dimensions
+complémentaires :
+
+\subsection{Dimension linguistique}
+
+Le français, avec ses 80 formes verbales conjuguées, ses nombreuses
+exceptions morphologiques et ses structures syntaxiques complexes, représente
+un défi particulier pour l'analyse automatique de sentiments. Les spécificités
+suivantes méritent une attention particulière :
+
+\begin{itemize}
+  \item \textbf{La négation :} ``Ce cours n'est pas mauvais'' exprime en
+        réalité quelque chose de positif, mais une approche naïve basée
+        sur la présence du mot ``mauvais'' le classerait négativement.
+  \item \textbf{L'intensification :} ``Vraiment excellent'', ``plutôt bien'',
+        ``assez décevant'' — les adverbes modificateurs changent fondamentalement
+        le niveau de sentiment exprimé.
+  \item \textbf{L'ironie et le sarcasme :} ``Super, encore un cours
+        incompréhensible...'' — nécessite une compréhension contextuelle
+        profonde, impossible pour les approches lexicales.
+\end{itemize}
+
+\subsection{Dimension technologique}
+
+Les approches traditionnelles d'analyse de sentiments basées sur des
+dictionnaires de polarité (comme SentiWordNet ou VADER) ou des modèles
+statistiques simples (SVM, Naive Bayes) présentent des performances
+insuffisantes sur le français informel utilisé par les étudiants. Le
+besoin d'un modèle profond pré-entraîné sur de larges corpus français
+s'impose donc naturellement.
+
+\subsection{Dimension applicative}
+
+Au-delà du modèle seul, le système doit être intégré dans une chaîne
+complète : ingestion des données, analyse, stockage, visualisation et
+accès depuis des interfaces variées (web, mobile). Cette contrainte
+d'intégration impose une architecture distribuée bien conçue.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Étude de l'Existant}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Solutions générales d'analyse de sentiments}
+
+\subsubsection{TextBlob et VADER}
+
+TextBlob et VADER sont des outils d'analyse de sentiments populaires pour
+l'anglais. VADER utilise un dictionnaire de polarité augmenté de règles
+grammaticales. Bien qu'efficaces pour l'anglais informel, ces outils offrent
+des performances médiocres en français (précision inférieure à 60\% sur
+des textes académiques).
+
+\subsubsection{Google Cloud Natural Language API}
+
+Google propose une API commerciale d'analyse de sentiments supportant
+le français. Elle présente l'avantage d'être prête à l'emploi mais souffre
+de plusieurs inconvénients majeurs dans notre contexte : coût par requête,
+dépendance à une connexion internet, confidentialité des données étudiantes
+et absence de personnalisation au vocabulaire académique.
+
+\subsubsection{Modèles BERT multilingues}
+
+\textbf{mBERT} (Multilingual BERT) et \textbf{XLM-RoBERTa} sont des modèles
+Transformer entraînés sur des dizaines de langues simultanément. Bien que
+supportant le français, leurs performances restent inférieures à un modèle
+monolingue spécialisé, car ils partagent leur capacité entre 100+ langues.
+
+\subsection{CamemBERT : l'état de l'art pour le français}
+
+CamemBERT \cite{martin2020camembert} représente l'état de l'art pour le
+Traitement du Langage Naturel en français. Développé conjointement par
+Inria, Facebook AI Research et le CNRS, il a été entraîné sur 138 Go de
+textes français provenant du corpus OSCAR \cite{ortiz2019oscar}. Ses
+performances surpassent systématiquement mBERT sur toutes les tâches NLP
+en français.
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des approches d'analyse de sentiments pour le français}
+\label{tab:comparaison_approches}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lcccp{3.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Approche} & \textbf{Précision} & \textbf{Gratuit} &
+\textbf{Hors-ligne} & \textbf{Personnalisable} \\
+\midrule
+VADER (anglais) & $<$55\% & Oui & Oui & Limitée \\
+\rowcolor{gray!8}
+TextBlob French & $\sim$58\% & Oui & Oui & Limitée \\
+Google NL API & $\sim$72\% & Non & Non & Non \\
+\rowcolor{gray!8}
+mBERT & $\sim$70\% & Oui & Oui & Oui \\
+XLM-RoBERTa & $\sim$74\% & Oui & Oui & Oui \\
+\rowcolor{vertprincipal!15}
+\textbf{CamemBERT (notre)} & \textbf{79,41\%} & \textbf{Oui} &
+\textbf{Oui} & \textbf{Oui} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Fondements Théoriques}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{L'architecture Transformer}
+
+Le Transformer \cite{vaswani2017attention} est une architecture de réseau
+de neurones introduite en 2017 qui a révolutionné le domaine du NLP. Sa
+caractéristique principale est le mécanisme d'\textbf{attention multi-têtes}
+(\textit{Multi-Head Self-Attention}) qui permet au modèle de pondérer
+l'importance de chaque mot dans une séquence par rapport à tous les autres
+mots, capturant ainsi des dépendances à longue distance que les architectures
+précédentes (RNN, LSTM) peinent à modéliser.
+
+La formule d'attention est définie par :
+\begin{equation}
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
+\label{eq:attention}
+\end{equation}
+
+où $Q$ (Queries), $K$ (Keys) et $V$ (Values) sont des matrices de
+projections linéaires, et $d_k$ est la dimension des clés.
+
+\subsection{BERT et le pré-entraînement bidirectionnel}
+
+\acrfull{bert} \cite{devlin2019bert} est un modèle Transformer qui exploite
+le contexte bidirectionnel : contrairement aux modèles auto-régressifs comme
+GPT qui lisent le texte de gauche à droite, BERT lit simultanément les
+contextes gauche et droit de chaque token. Cette bidirectionnalité est
+obtenue grâce à deux tâches de pré-entraînement :
+
+\begin{itemize}
+  \item \textbf{Masked Language Modeling (MLM) :} 15\% des tokens sont
+        masqués aléatoirement, et le modèle doit les prédire.
+  \item \textbf{Next Sentence Prediction (NSP) :} le modèle prédit si
+        deux phrases sont consécutives dans le texte original.
+\end{itemize}
+
+\subsection{CamemBERT}
+
+CamemBERT reprend l'architecture RoBERTa \cite{liu2019roberta} (optimisation
+de BERT), mais est entraîné uniquement sur du texte français. Il utilise la
+tokenisation \textbf{SentencePiece} \cite{kudo2018sentencepiece} avec un
+vocabulaire de 32 000 tokens, permettant une meilleure représentation
+des mots français et de leurs formes fléchies.
+
+\subsection{Le fine-tuning par transfert d'apprentissage}
+
+Le \textit{transfer learning} consiste à adapter un modèle pré-entraîné
+sur une tâche générale à une tâche spécifique en le ré-entraînant sur un
+petit jeu de données annoté. Pour la classification de sentiment, on ajoute
+une couche de classification linéaire au-dessus du token \texttt{[CLS]}
+de CamemBERT, puis on affine l'ensemble des paramètres :
+
+\begin{equation}
+P(\text{classe}_k | \mathbf{x}) = \text{softmax}(W \cdot \mathbf{h}_{CLS} + b)_k
+\label{eq:classification}
+\end{equation}
+
+où $\mathbf{h}_{CLS}$ est la représentation du token \texttt{[CLS]},
+$W$ est la matrice de poids de la couche de classification et $b$ le
+biais.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Valeur Ajoutée du Projet}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Notre système apporte plusieurs contributions concrètes par rapport aux
+solutions existantes :
+
+\begin{definitionbox}[Contributions principales]
+\begin{enumerate}
+  \item \textbf{Spécialisation domaine :} fine-tuning sur des commentaires
+        académiques français, améliore la précision sur le domaine cible.
+  \item \textbf{Système complet :} de la collecte de données à l'affichage
+        mobile, en passant par l'API et le dashboard, le système est
+        opérationnel bout en bout.
+  \item \textbf{Temps réel :} analyse et retour instantané ($<$ 1 seconde),
+        contrairement aux systèmes batch traditionnels.
+  \item \textbf{Accessibilité :} application mobile Flutter pour les
+        étudiants, dashboard web pour les enseignants.
+  \item \textbf{Gratuité et confidentialité :} déployable entièrement
+        en local, sans dépendance à des services cloud payants.
+\end{enumerate}
+\end{definitionbox}
+
+\section*{Conclusion du Chapitre}
+
+Ce chapitre a établi le contexte motivant notre projet, analysé les
+limites des approches existantes et positionné CamemBERT comme le choix
+technologique le plus pertinent pour l'analyse de sentiments en français
+académique. Le chapitre suivant détaille l'analyse fonctionnelle et la
+conception architecturale du système.
+
+\cleardoublepage

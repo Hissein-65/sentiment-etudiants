@@ -1,0 +1,190 @@
+% ==============================================================================
+% CHAPITRE 5 : DISCUSSION ET PERSPECTIVES
+% ==============================================================================
+\chapter{Discussion et Perspectives}
+
+\begin{infobox}[Objectif du chapitre]
+Ce chapitre propose une analyse critique des résultats obtenus, identifie
+les limites actuelles du système et trace les perspectives d'évolution
+et d'amélioration futures.
+\end{infobox}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Analyse Critique des Résultats}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Points forts du système}
+
+\subsubsection{Performance remarquable sur un petit jeu de données}
+
+Obtenir une précision de 79.41\% avec seulement 225 exemples d'entraînement
+est un résultat significatif. Il illustre la puissance du transfer learning :
+CamemBERT, ayant été pré-entraîné sur 138 Go de texte français, possède
+déjà une compréhension profonde de la langue. Le fine-tuning n'a qu'à
+adapter cette compréhension générale à la tâche spécifique de la
+classification de sentiments étudiants.
+
+À titre de comparaison, un modèle LSTM entraîné à partir de zéro sur le
+même jeu de données obtiendrait typiquement une précision inférieure à 60\%,
+car il n'aurait pas le bénéfice de ce vaste pré-entraînement.
+
+\subsubsection{Architecture microservices modulaire}
+
+La séparation claire entre le modèle IA, l'API, le dashboard et
+l'application mobile permet :
+\begin{itemize}
+  \item De mettre à jour le modèle sans toucher aux interfaces utilisateur.
+  \item D'ajouter de nouvelles interfaces (ex: application web) sans
+        modifier le backend.
+  \item De scaler chaque composant indépendamment selon la charge.
+  \item De remplacer facilement une technologie par une autre (ex: MySQL
+        au lieu de PostgreSQL) sans impact sur les autres couches.
+\end{itemize}
+
+\subsubsection{Accessibilité multi-canal}
+
+Le système répond à deux profils d'utilisateurs distincts :
+\begin{itemize}
+  \item \textbf{L'étudiant}, qui accède via une application mobile intuitive,
+        sans barrière technique.
+  \item \textbf{L'enseignant}, qui dispose d'un tableau de bord analytique
+        riche en visualisations.
+\end{itemize}
+
+\subsection{Limites identifiées}
+
+\subsubsection{Taille du jeu de données}
+
+La principale limitation du système est la taille du jeu de données
+d'entraînement (225 exemples). Bien que les résultats soient encourageants,
+un modèle entraîné sur 10 000 exemples ou plus serait nettement plus robuste,
+notamment pour :
+\begin{itemize}
+  \item Les expressions idiomatiques et le langage familier étudiant.
+  \item Les commentaires très courts (1-2 phrases) qui sont plus difficiles
+        à classifier.
+  \item Les nuances culturelles spécifiques à certains établissements.
+\end{itemize}
+
+\subsubsection{Absence d'authentification}
+
+Le système actuel ne dispose pas d'un mécanisme d'authentification.
+Tout utilisateur connaissant l'URL de l'API peut soumettre des commentaires
+ou accéder aux statistiques. Dans un contexte de production réel, cela
+représente une vulnérabilité importante.
+
+\subsubsection{Déploiement local uniquement}
+
+Le système est actuellement configuré pour fonctionner en local. Pour
+un déploiement en production accessible à tous les étudiants d'un
+établissement, il faudrait déployer l'API sur un serveur cloud (AWS,
+GCP, Azure, ou VPS) et adapter l'URL dans l'application mobile.
+
+\subsubsection{Pas de gestion des doublons}
+
+Le système actuel ne détecte pas les commentaires identiques soumis
+plusieurs fois, ce qui peut fausser les statistiques.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Impact Potentiel du Projet}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Ce système, dans un contexte de déploiement réel, pourrait avoir un impact
+significatif sur la qualité de l'enseignement supérieur :
+
+\begin{table}[H]
+\centering
+\caption{Impact potentiel selon les parties prenantes}
+\label{tab:impact}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{3cm} p{10cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Partie prenante} & \textbf{Bénéfice concret} \\
+\midrule
+Étudiants & Retour d'expérience immédiat, sentiment d'être écouté, interaction plus engageante \\
+\rowcolor{gray!8}
+Enseignants & Identification rapide des cours mal compris, ajustement pédagogique en temps réel \\
+Administration & Vue macro de la satisfaction par département, allocation optimale des ressources \\
+\rowcolor{gray!8}
+Établissement & Amélioration continue de la qualité, différenciation concurrentielle \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Perspectives d'Évolution}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Améliorations à court terme}
+
+\begin{enumerate}
+  \item \textbf{Agrandissement du jeu de données :} collecter 500 à 1000
+        commentaires réels anonymisés d'étudiants pour re-fine-tuner le modèle
+        et améliorer sa précision à 85\%+.
+
+  \item \textbf{Authentification JWT :} implémenter JSON Web Tokens pour
+        sécuriser l'API. Chaque étudiant s'authentifie et les commentaires
+        sont liés à un compte anonymisé.
+
+  \item \textbf{Interface web responsive :} ajouter une page web React ou
+        Vue.js pour les étudiants ne disposant pas d'un smartphone Android.
+
+  \item \textbf{Déploiement Docker :} conteneuriser le backend, la base de
+        données et le dashboard dans des conteneurs Docker orchestrés par
+        Docker Compose pour faciliter le déploiement et la portabilité.
+\end{enumerate}
+
+\subsection{Améliorations à moyen terme}
+
+\begin{enumerate}
+  \item \textbf{Analyse des aspects (Aspect-Based Sentiment Analysis) :}
+        au lieu d'attribuer un seul sentiment à tout un commentaire,
+        identifier les aspects mentionnés (``le contenu du cours'',
+        ``la pédagogie du professeur'', ``le rythme'') et attribuer
+        un sentiment à chacun.
+
+  \item \textbf{Extraction de mots-clés :} identifier automatiquement
+        les termes les plus fréquemment associés à chaque classe de sentiment
+        (TF-IDF, YAKE ou KeyBERT) pour comprendre \textit{pourquoi} un
+        cours est bien ou mal perçu.
+
+  \item \textbf{Application iOS :} Flutter étant cross-platform, l'extension
+        à iOS nécessite principalement une configuration Xcode et un compte
+        développeur Apple.
+
+  \item \textbf{Alertes automatiques :} envoyer un email ou une notification
+        push à l'enseignant lorsque le taux de commentaires négatifs dépasse
+        un seuil configurable.
+\end{enumerate}
+
+\subsection{Vision à long terme}
+
+\begin{definitionbox}[Évolution vers un système de recommandation pédagogique]
+À terme, le système pourrait évoluer vers une plateforme d'intelligence
+pédagogique capable de :
+\begin{itemize}
+  \item Corréler les sentiments avec les résultats académiques (notes,
+        taux d'abandon) pour identifier les cours à risque.
+  \item Recommander automatiquement des ressources pédagogiques
+        complémentaires aux étudiants dont les commentaires révèlent des
+        difficultés de compréhension.
+  \item Générer des rapports pédagogiques automatiques pour les conseils
+        d'enseignement, alimentés par les analyses de sentiments agrégées.
+  \item Intégrer des modèles multimodaux prenant en compte non seulement
+        le texte mais aussi la fréquence de participation et les patterns
+        temporels des commentaires.
+\end{itemize}
+\end{definitionbox}
+
+\section*{Conclusion du Chapitre}
+
+Ce chapitre a présenté une analyse honnête et nuancée du système développé.
+Ses points forts résident dans l'utilisation d'une technologie de pointe
+(CamemBERT), une architecture modulaire bien conçue et une accessibilité
+multi-canal. Ses limites principales — liées à la taille du dataset et à
+l'absence d'authentification — sont clairement identifiées et des solutions
+concrètes ont été proposées. Ce travail constitue une base solide sur
+laquelle des évolutions significatives pourront être construites.
+
+\cleardoublepage

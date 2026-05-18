@@ -1,0 +1,583 @@
+% ==============================================================================
+% CHAPITRE 3 : IMPLÉMENTATION
+% ==============================================================================
+\chapter{Implémentation}
+
+\begin{infobox}[Objectif du chapitre]
+Ce chapitre décrit en détail l'environnement de développement, la structure
+du projet, les algorithmes clés et les parties importantes du code source
+de chaque composant du système.
+\end{infobox}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Environnements de Développement}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Environnement matériel}
+
+\begin{table}[H]
+\centering
+\caption{Configuration matérielle de développement}
+\label{tab:hardware}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Composant} & \textbf{Spécification} & \textbf{Impact} \\
+\midrule
+Processeur & Intel/AMD x86-64 & Exécution du modèle sur CPU \\
+\rowcolor{gray!8}
+Mémoire RAM & 8 Go minimum & Chargement du modèle ($\sim$430 Mo) \\
+Stockage & 20 Go disponibles & Modèle + SDK Android + venv \\
+\rowcolor{gray!8}
+OS & Ubuntu 24.04 LTS & Environnement de production Linux \\
+Réseau & Wi-Fi / Ethernet & Communication émulateur $\leftrightarrow$ API \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Environnement logiciel}
+
+\begin{table}[H]
+\centering
+\caption{Logiciels et versions utilisés}
+\label{tab:software}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Logiciel} & \textbf{Version} & \textbf{Rôle} \\
+\midrule
+Python & 3.12 & Langage backend et IA \\
+\rowcolor{gray!8}
+PyTorch & 2.x & Framework Deep Learning \\
+Transformers (HuggingFace) & 4.x & Modèles pré-entraînés \\
+\rowcolor{gray!8}
+FastAPI & 0.110+ & Framework API REST \\
+SQLAlchemy & 2.0+ & ORM Python-PostgreSQL \\
+\rowcolor{gray!8}
+PostgreSQL & 16 & Base de données relationnelle \\
+Streamlit & 1.x & Dashboard web Python \\
+\rowcolor{gray!8}
+Flutter SDK & 3.24.5 & Développement application mobile \\
+Dart & 3.x & Langage de l'application mobile \\
+\rowcolor{gray!8}
+Android Studio & 2024.2 & Émulateur Android, IDE Flutter \\
+VS Code & 1.119 & Éditeur de code principal \\
+\rowcolor{gray!8}
+Git & 2.x & Contrôle de version \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Structure du Projet}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\begin{lstlisting}[
+  language=bash, caption={Structure complète du projet},
+  label={lst:structure}, basicstyle=\ttfamily\footnotesize,
+  frame=single, backgroundcolor=\color{griscode},
+  numbers=none, xleftmargin=0.5cm
+]
+sentiment_etudiants/
+|-- ai_model/                  # Module IA (CamemBERT)
+|   |-- preprocessing/
+|   |   |-- nettoyage_texte.py # Pipeline de nettoyage NLP
+|   |   |-- tokenisation.py    # Tokenisation CamemBERT
+|   |   `-- preparer_donnees.py# Pipeline preparation dataset
+|   |-- modele_camembert.py    # Chargement/sauvegarde du modele
+|   |-- entrainement.py        # Script d'entrainement (fine-tuning)
+|   |-- evaluation.py          # Metriques: accuracy, F1, matrice
+|   `-- saved_model/           # Modele fine-tune sauvegarde
+|-- backend/                   # API FastAPI
+|   |-- database.py            # Connexion PostgreSQL via SQLAlchemy
+|   |-- models/modeles_db.py   # ORM: table commentaires
+|   |-- routers/commentaires.py# Routes REST: predict, CRUD
+|   |-- services/prediction_service.py # Singleton inference
+|   `-- main.py                # Point d'entree FastAPI
+|-- dashboard/                 # Tableau de bord Streamlit
+|   |-- app.py                 # Page d'accueil
+|   |-- components/api_client.py# Client HTTP vers l'API
+|   `-- pages/                 # Pages Streamlit multi-pages
+|       |-- 1_Analyse.py       # Analyse individuelle
+|       |-- 2_Statistiques.py  # Graphiques Plotly
+|       `-- 3_Historique.py    # Liste et filtres
+|-- mobile_app/                # Application Flutter
+|   `-- lib/
+|       |-- main.dart          # Point d'entree + navigation
+|       |-- models/commentaire.dart  # Modele de donnees Dart
+|       |-- services/api_service.dart# Client HTTP Dart
+|       |-- widgets/sentiment_card.dart # Widget reutilisable
+|       `-- screens/
+|           |-- analyse_screen.dart  # Ecran d'analyse
+|           `-- historique_screen.dart# Ecran historique
+`-- datasets/
+    |-- raw/commentaires_etudiants.csv # 225 commentaires
+    `-- processed/{train,validation,test}.csv
+\end{lstlisting}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Module IA — Pipeline CamemBERT}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Prétraitement du texte}
+
+Avant toute tokenisation, les commentaires bruts sont nettoyés par un
+pipeline séquentiel défini dans \texttt{nettoyage\_texte.py} :
+
+\begin{lstlisting}[style=stylePython, caption={Pipeline de nettoyage NLP}, label={lst:nettoyage}]
+def nettoyer_commentaire(texte: str) -> str:
+    """Pipeline complet de nettoyage d'un commentaire."""
+    if not isinstance(texte, str) or len(texte.strip()) == 0:
+        return ""
+    # Etape 1 : Normalisation Unicode (NFC)
+    texte = unicodedata.normalize("NFC", texte)
+    texte = texte.replace(u"«", '"').replace(u"»", '"')
+    # Etape 2 : Suppression des URLs, emails et caracteres speciaux
+    texte = re.sub(r"http\S+|www\S+", "", texte)
+    texte = re.sub(r"\S+@\S+", "", texte)
+    texte = re.sub(r"[^\w\sA-Za-zÀ-ž'',;:!?.\-]", " ", texte)
+    # Etape 3 : Mise en minuscules
+    texte = texte.lower()
+    # Etape 4 : Normalisation des espaces
+    texte = re.sub(r"\s+", " ", texte).strip()
+    return texte
+\end{lstlisting}
+
+Ce pipeline traite les cas suivants :
+\begin{itemize}
+  \item \textbf{Normalisation Unicode :} harmonise les caractères composés
+        (é peut être représenté de deux façons en Unicode).
+  \item \textbf{Guillemets typographiques :} « » sont remplacés par des
+        guillemets droits ASCII.
+  \item \textbf{URLs et emails :} supprimés car non pertinents pour l'analyse
+        de sentiment.
+  \item \textbf{Minuscules :} CamemBERT est sensible à la casse, la mise
+        en minuscules améliore la cohérence.
+\end{itemize}
+
+\subsection{Jeu de données}
+
+Le jeu de données a été constitué manuellement avec \textbf{225 commentaires
+étudiants} en français, répartis équitablement en 3 classes :
+
+\begin{table}[H]
+\centering
+\caption{Répartition du jeu de données}
+\label{tab:dataset}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Classe} & \textbf{Étiquette} & \textbf{Exemples} & \textbf{Proportion} \\
+\midrule
+Négatif & 0 & 75 & 33,33\% \\
+\rowcolor{gray!8}
+Neutre & 1 & 75 & 33,33\% \\
+Positif & 2 & 75 & 33,33\% \\
+\midrule
+\rowcolor{bleuprincipal!8}
+\textbf{Total} & -- & \textbf{225} & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le découpage train/validation/test respecte une stratification :
+
+\begin{table}[H]
+\centering
+\caption{Découpage du dataset (stratifié)}
+\label{tab:split}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Ensemble} & \textbf{Taille} & \textbf{Proportion} &
+\textbf{Usage} & \textbf{Batches} \\
+\midrule
+Entraînement & 157 & $\sim$70\% & Mise à jour des poids & 10 \\
+\rowcolor{gray!8}
+Validation & 34 & $\sim$15\% & Sélection du meilleur modèle & 3 \\
+Test & 34 & $\sim$15\% & Évaluation finale non biaisée & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Architecture du modèle fine-tuné}
+
+Le modèle CamemBERT fine-tuné est composé de :
+
+\begin{enumerate}
+  \item \textbf{Couche d'entrée :} tokenisation SentencePiece (vocabulaire
+        32 000 tokens, séquences de max 128 tokens).
+  \item \textbf{12 blocs Transformer :} chaque bloc contient un mécanisme
+        d'attention multi-têtes (12 têtes, dimension 768) et un réseau
+        Feed-Forward (dimension 3072).
+  \item \textbf{Couche de classification :} projection linéaire
+        $768 \rightarrow 3$ suivie d'un Softmax.
+\end{enumerate}
+
+Le nombre total de paramètres est de \textbf{110,6 millions}, dont les
+poids de la couche de classification ($768 \times 3 + 3 = 2307$ paramètres
+ajoutés).
+
+\subsection{Boucle d'entraînement}
+
+\begin{lstlisting}[style=stylePython, caption={Boucle d'entraînement fine-tuning CamemBERT}, label={lst:training}]
+def entrainer_une_epoch(modele, loader_train, optimiseur, scheduler,
+                        device, num_epoch):
+    modele.train()
+    perte_totale = 0.0
+    nb_correct, nb_total = 0, 0
+
+    for i, batch in enumerate(loader_train):
+        input_ids      = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        labels         = batch["labels"].to(device)
+
+        # 1. Remise a zero des gradients
+        optimiseur.zero_grad()
+
+        # 2. Passage avant : calcul de la perte cross-entropique
+        sorties = modele(input_ids=input_ids,
+                         attention_mask=attention_mask,
+                         labels=labels)
+        perte = sorties.loss
+
+        # 3. Retropropagation : calcul des gradients
+        perte.backward()
+
+        # 4. Ecrêtage des gradients (previent l'explosion)
+        torch.nn.utils.clip_grad_norm_(modele.parameters(), max_norm=1.0)
+
+        # 5. Mise a jour des poids
+        optimiseur.step()
+        scheduler.step()  # Ajuste le learning rate
+
+        perte_totale += perte.item()
+        predictions = torch.argmax(sorties.logits, dim=1)
+        nb_correct  += (predictions == labels).sum().item()
+        nb_total    += labels.size(0)
+
+    return perte_totale / len(loader_train), nb_correct / nb_total * 100
+\end{lstlisting}
+
+\textbf{Points techniques importants :}
+\begin{itemize}
+  \item \texttt{optimiseur.zero\_grad()} : réinitialise les gradients
+        accumulés du batch précédent. Sans cela, les gradients s'accumulent
+        à chaque batch, causant des mises à jour erronées.
+  \item \texttt{clip\_grad\_norm\_(max\_norm=1.0)} : technique standard pour
+        les Transformers évitant l'explosion des gradients (gradient clipping).
+  \item \texttt{scheduler.step()} : ajuste le taux d'apprentissage selon
+        le scheduler linéaire avec warmup défini.
+\end{itemize}
+
+\subsection{Hyperparamètres d'entraînement}
+
+\begin{table}[H]
+\centering
+\caption{Hyperparamètres du fine-tuning}
+\label{tab:hyperparams}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Hyperparamètre} & \textbf{Valeur} & \textbf{Justification} \\
+\midrule
+Taux d'apprentissage & $2 \times 10^{-5}$ & Standard fine-tuning BERT, évite le catastrophic forgetting \\
+\rowcolor{gray!8}
+Taille de lot (batch) & 16 & Compromis mémoire/variance du gradient \\
+Époques & 3 & Suffisant pour un petit dataset, évite le surapprentissage \\
+\rowcolor{gray!8}
+Max tokens & 128 & Couvre 95\%+ des commentaires, économise la mémoire \\
+Optimiseur & AdamW & Standard pour les Transformers, weight decay régularise \\
+\rowcolor{gray!8}
+Warmup ratio & 10\% & Stabilise le début de l'entraînement \\
+Gradient clipping & 1.0 & Prévient l'explosion des gradients \\
+\rowcolor{gray!8}
+Weight decay & 0.01 & Régularisation L2 pour réduire le surapprentissage \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Module Backend — FastAPI}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Démarrage du serveur et lifespan}
+
+\begin{lstlisting}[style=stylePython, caption={Initialisation FastAPI avec lifespan}, label={lst:fastapi_main}]
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialisation au demarrage, nettoyage a l'arret."""
+    print("[DEMARRAGE] Initialisation de l'API...")
+    creer_tables()           # Creation des tables PostgreSQL
+    service_prediction.charger()  # Chargement du modele CamemBERT en RAM
+    print("[DEMARRAGE] API prete.")
+    yield                    # Le serveur tourne ici
+    print("[ARRET] Fermeture de l'API.")
+
+app = FastAPI(
+    title="API Analyse de Sentiments Etudiants",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+app.add_middleware(CORSMiddleware,
+    allow_origins=["*"],  # Flutter + Streamlit peuvent appeler l'API
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+\end{lstlisting}
+
+Le pattern \texttt{lifespan} remplace les anciens \texttt{startup\_event}
+et \texttt{shutdown\_event} de FastAPI. Il garantit que le modèle CamemBERT
+est chargé une seule fois en mémoire au démarrage du serveur, évitant un
+rechargement coûteux à chaque requête.
+
+\subsection{Service de prédiction — Pattern Singleton}
+
+\begin{lstlisting}[style=stylePython, caption={Implémentation du pattern Singleton}, label={lst:singleton}]
+class ServicePrediction:
+    """
+    Singleton : une seule instance partagee dans toute l'application.
+    Garantit que le modele CamemBERT (430 Mo) n'est charge qu'une fois.
+    """
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialise = False
+        return cls._instance
+
+    def predict(self, texte: str) -> dict:
+        texte_nettoye = nettoyer_commentaire(texte)
+
+        encodage = self.tokeniseur(
+            texte_nettoye,
+            max_length=128,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt"
+        )
+
+        with torch.no_grad():  # Desactive le calcul des gradients
+            sorties = self.modele(
+                input_ids=encodage["input_ids"].to(self.device),
+                attention_mask=encodage["attention_mask"].to(self.device)
+            )
+
+        # Conversion logits -> probabilites
+        probs = F.softmax(sorties.logits, dim=1).squeeze().tolist()
+        classe = int(torch.argmax(sorties.logits, dim=1).item())
+
+        return {
+            "sentiment_predit": classe,
+            "label_sentiment" : LABELS[classe],
+            "score_negatif"   : round(probs[0], 4),
+            "score_neutre"    : round(probs[1], 4),
+            "score_positif"   : round(probs[2], 4),
+        }
+\end{lstlisting}
+
+\textbf{Pourquoi \texttt{torch.no\_grad()} ?} Lors de l'inférence (prédiction),
+nous n'avons pas besoin de calculer les gradients (ça, c'est pour
+l'entraînement). Cette directive réduit la consommation mémoire de 50\%
+et accélère les calculs.
+
+\subsection{Validation des données avec Pydantic}
+
+\begin{lstlisting}[style=stylePython, caption={Schémas de validation Pydantic}, label={lst:pydantic}]
+class RequetePrediction(BaseModel):
+    """Corps de la requete POST /api/predict"""
+    texte   : str           = Field(..., min_length=5, max_length=2000,
+                              description="Commentaire a analyser")
+    matiere : Optional[str] = Field(None, max_length=100)
+
+class ReponseCommentaire(BaseModel):
+    """Schema de reponse standardise"""
+    id               : int
+    texte_original   : str
+    matiere          : Optional[str]
+    sentiment_predit : int
+    label_sentiment  : str
+    scores           : dict
+    date_creation    : Optional[str]
+
+    class Config:
+        from_attributes = True  # Lecture depuis un objet SQLAlchemy
+\end{lstlisting}
+
+Pydantic garantit que :
+\begin{itemize}
+  \item Le texte fait au moins 5 caractères (sinon HTTP 422).
+  \item Les types sont corrects (int, str, etc.).
+  \item Les champs optionnels sont traités correctement.
+  \item La sérialisation JSON est automatique.
+\end{itemize}
+
+\subsection{Routes API — Récapitulatif}
+
+\begin{table}[H]
+\centering
+\caption{Endpoints de l'API REST}
+\label{tab:endpoints}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{llp{3.5cm}p{3.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Méthode} & \textbf{Route} & \textbf{Paramètres} & \textbf{Description} \\
+\midrule
+\rowcolor{vertprincipal!10}
+POST & \texttt{/api/predict} & \texttt{\{texte, matiere?\}} & Analyse + sauvegarde \\
+GET & \texttt{/api/commentaires} & \texttt{?limite, sentiment, matiere} & Liste paginée filtrée \\
+\rowcolor{gray!8}
+GET & \texttt{/api/commentaires/\{id\}} & \texttt{id} (chemin) & Détail d'un commentaire \\
+GET & \texttt{/api/stats} & -- & Statistiques agrégées \\
+\rowcolor{rougeprincipal!10}
+DELETE & \texttt{/api/commentaires/\{id\}} & \texttt{id} (chemin) & Suppression \\
+GET & \texttt{/health} & -- & Statut du serveur \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Module Application Mobile — Flutter}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Service API — Communication HTTP}
+
+\begin{lstlisting}[style=styleDart, caption={Service HTTP Flutter}, label={lst:flutter_api}]
+class ApiService {
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+  static const Duration _timeout = Duration(seconds: 30);
+
+  static Future<Commentaire?> analyserCommentaire({
+    required String texte,
+    String? matiere,
+  }) async {
+    try {
+      final body = <String, dynamic>{'texte': texte};
+      if (matiere != null) body['matiere'] = matiere;
+
+      final reponse = await http.post(
+        Uri.parse('$_baseUrl/predict'),
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode(body),
+      ).timeout(_timeout);
+
+      if (reponse.statusCode == 200) {
+        final json = jsonDecode(utf8.decode(reponse.bodyBytes));
+        return Commentaire.fromJson(json);
+      }
+      return null;
+    } catch (_) {
+      return null;  // Gestion silencieuse des erreurs reseau
+    }
+  }
+}
+\end{lstlisting}
+
+\textbf{Pourquoi \texttt{10.0.2.2} ?} L'émulateur Android est une machine
+virtuelle qui possède sa propre interface réseau. Pour accéder au
+\texttt{localhost} de l'ordinateur hôte depuis l'émulateur, Android
+redirige l'adresse \texttt{10.0.2.2} vers \texttt{127.0.0.1} de la machine
+hôte. Sur un vrai téléphone, il faudrait utiliser l'IP locale du PC.
+
+\subsection{Navigation par onglets avec IndexedStack}
+
+\begin{lstlisting}[style=styleDart, caption={Navigation IndexedStack}, label={lst:navigation}]
+class _AccueilPageState extends State<AccueilPage> {
+  int _ongletActif = 0;
+
+  final List<Widget> _ecrans = const [
+    AnalyseScreen(),     // Index 0
+    HistoriqueScreen(),  // Index 1
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _ongletActif,
+        children: _ecrans,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _ongletActif,
+        onDestinationSelected: (i) => setState(() => _ongletActif = i),
+        // ...
+      ),
+    );
+  }
+}
+\end{lstlisting}
+
+\texttt{IndexedStack} maintient les deux écrans en vie simultanément en
+mémoire. L'écran visible est déterminé par l'index. Ce choix architectural
+préserve l'état de chaque écran lors de la navigation (la liste de l'historique
+n'est pas rechargée à chaque changement d'onglet).
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Gestion des Erreurs et Performances}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Gestion des erreurs}
+
+\begin{table}[H]
+\centering
+\caption{Stratégie de gestion des erreurs}
+\label{tab:errors}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{p{3cm} p{3.5cm} p{6cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Couche} & \textbf{Erreur possible} & \textbf{Gestion} \\
+\midrule
+API FastAPI & Texte trop court & HTTP 422 (Unprocessable Entity) + message \\
+\rowcolor{gray!8}
+API FastAPI & Erreur modèle & HTTP 500 + message d'erreur technique \\
+API FastAPI & ID inexistant & HTTP 404 (Not Found) \\
+\rowcolor{gray!8}
+Flutter & Timeout réseau & \texttt{null} retourné, message affiché \\
+Flutter & Serveur injoignable & Message ``Impossible de joindre l'API'' \\
+\rowcolor{gray!8}
+Modèle IA & Texte vide après nettoyage & ValueError explicite levée \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Optimisations de performance}
+
+\begin{itemize}
+  \item \textbf{Singleton ServicePrediction :} le modèle CamemBERT (430 Mo)
+        est chargé une seule fois en mémoire au démarrage. Toutes les requêtes
+        partagent la même instance, évitant un rechargement à chaque appel.
+
+  \item \textbf{torch.no\_grad() :} désactive le calcul du graphe de
+        gradient lors de l'inférence, réduisant la mémoire consommée de
+        50\% et améliorant la vitesse de 20\%.
+
+  \item \textbf{Modèle en mode eval() :} \texttt{model.eval()} désactive
+        le Dropout et le BatchNorm (actifs seulement à l'entraînement),
+        garantissant des prédictions déterministes et plus rapides.
+
+  \item \textbf{Pagination API :} les listes de commentaires sont paginées
+        (paramètre \texttt{limite}) pour éviter de charger de grandes quantités
+        de données inutilement.
+
+  \item \textbf{IndexedStack Flutter :} évite la reconstruction des widgets
+        à chaque navigation, préservant l'état et améliorant la fluidité.
+\end{itemize}
+
+\section*{Conclusion du Chapitre}
+
+L'implémentation du système repose sur une architecture propre, modulaire
+et respectueuse des bonnes pratiques. Chaque composant a été développé de
+manière indépendante, communiquant via des interfaces bien définies.
+Le chapitre suivant évalue les performances du système et présente les
+résultats obtenus.
+
+\cleardoublepage

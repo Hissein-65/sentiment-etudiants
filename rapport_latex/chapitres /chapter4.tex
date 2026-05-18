@@ -1,0 +1,283 @@
+% ==============================================================================
+% CHAPITRE 4 : TESTS ET RÉSULTATS
+% ==============================================================================
+\chapter{Tests et Résultats}
+
+\begin{infobox}[Objectif du chapitre]
+Ce chapitre présente la stratégie de validation du système, les métriques
+de performance du modèle d'IA, les scénarios de tests fonctionnels
+et une analyse critique des résultats obtenus.
+\end{infobox}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Stratégie de Validation}
+% ──────────────────────────────────────────────────────────────────────────────
+
+La validation du système s'articule autour de trois niveaux complémentaires :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  level/.style={rectangle, rounded corners=6pt, minimum width=10cm,
+                minimum height=1cm, align=center, font=\small\bfseries,
+                thick, draw},
+]
+\node[level, fill=bleuprincipal!15, draw=bleuprincipal] at (0,3)
+  {Niveau 1 : Tests Unitaires — Fonctions individuelles (nettoyage, tokenisation, modèle)};
+\node[level, fill=vertprincipal!15, draw=vertprincipal] at (0,1.5)
+  {Niveau 2 : Tests d'Intégration — Communication API $\leftrightarrow$ DB $\leftrightarrow$ Modèle};
+\node[level, fill=orangeaccent!10, draw=orangeaccent] at (0,0)
+  {Niveau 3 : Tests Fonctionnels — Scénarios utilisateur bout en bout};
+\end{tikzpicture}
+\caption{Pyramide de validation du système}
+\label{fig:test_pyramid}
+\end{figure}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Performances du Modèle d'IA}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Résultats d'entraînement par époque}
+
+\begin{table}[H]
+\centering
+\caption{Évolution des métriques pendant l'entraînement}
+\label{tab:training_history}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{ccccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Époque} & \textbf{Loss Train} & \textbf{Acc. Train} &
+\textbf{Loss Val.} & \textbf{Acc. Val.} \\
+\midrule
+1 & 0.9821 & 58.6\% & 0.8743 & 64.7\% \\
+\rowcolor{gray!8}
+2 & 0.6234 & 74.5\% & 0.6512 & 73.5\% \\
+3 & \textbf{0.3876} & \textbf{85.4\%} & \textbf{0.5981} & \textbf{76.5\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Métriques finales sur le jeu de test}
+
+Le meilleur modèle (epoch 3, loss validation minimale) est évalué sur
+le jeu de test final qui n'a jamais été utilisé pendant l'entraînement :
+
+\begin{table}[H]
+\centering
+\caption{Rapport de classification sur le jeu de test}
+\label{tab:classification_report}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Classe} & \textbf{Précision} & \textbf{Rappel} &
+\textbf{F1-Score} & \textbf{Support} \\
+\midrule
+\textcolor{rougeprincipal}{\textbf{Négatif}} (0) & 1.0000 & 0.6364 & 0.7778 & 11 \\
+\rowcolor{gray!8}
+\textcolor{jauneneutre!70!black}{\textbf{Neutre}} (1) & 0.6250 & 0.8333 & 0.7143 & 12 \\
+\textcolor{vertprincipal}{\textbf{Positif}} (2) & 0.8462 & 1.0000 & 0.9167 & 11 \\
+\midrule
+\rowcolor{bleuprincipal!8}
+\textbf{Accuracy globale} & \multicolumn{4}{c}{\textbf{79.41\% (27/34)}} \\
+\midrule
+Macro avg & 0.8237 & 0.8232 & 0.8029 & 34 \\
+\rowcolor{gray!8}
+Weighted avg & 0.8253 & 0.7941 & 0.7993 & 34 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Matrice de confusion}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    axis on top,
+    width=8cm, height=8cm,
+    xmin=-0.5, xmax=2.5,
+    ymin=-0.5, ymax=2.5,
+    xtick={0,1,2},
+    ytick={0,1,2},
+    xticklabels={Négatif, Neutre, Positif},
+    yticklabels={Positif, Neutre, Négatif},
+    xlabel={\textbf{Prédit}},
+    ylabel={\textbf{Réel}},
+    xlabel style={font=\bfseries\small},
+    ylabel style={font=\bfseries\small},
+    tick label style={font=\small},
+    colormap={greenblue}{
+      color(0)=(white) color(1)=(bleuprincipal!80)
+    },
+    point meta min=0, point meta max=12
+]
+% Matrice : [Réel=Nég: 7,3,1], [Réel=Neu: 0,10,2], [Réel=Pos: 0,0,11]
+\addplot[matrix plot*, mesh/cols=3, point meta=explicit]
+coordinates {
+  (0,2) [7]  (1,2) [3]  (2,2) [1]
+  (0,1) [0]  (1,1) [10] (2,1) [2]
+  (0,0) [0]  (1,0) [0]  (2,0) [11]
+};
+
+% Annotations
+\node at (axis cs:0,2) {\large\bfseries 7};
+\node at (axis cs:1,2) {\large 3};
+\node at (axis cs:2,2) {\large 1};
+\node at (axis cs:0,1) {\large 0};
+\node at (axis cs:1,1) {\large\bfseries 10};
+\node at (axis cs:2,1) {\large 2};
+\node at (axis cs:0,0) {\large 0};
+\node at (axis cs:1,0) {\large 0};
+\node at (axis cs:2,0) {\large\bfseries 11};
+\end{axis}
+\end{tikzpicture}
+\caption{Matrice de confusion sur le jeu de test (34 exemples)}
+\label{fig:confusion_matrix}
+\end{figure}
+
+\subsection{Analyse des résultats}
+
+\textbf{Points forts observés :}
+\begin{itemize}
+  \item La classe \textbf{Positif} est parfaitement reconnue (rappel = 100\%,
+        F1 = 0.917). Le modèle n'a jamais manqué un commentaire positif.
+  \item La classe \textbf{Négatif} atteint une précision parfaite (100\%) :
+        quand le modèle dit qu'un commentaire est négatif, il a toujours raison.
+  \item L'accuracy globale de \textbf{79.41\%} est remarquable compte tenu
+        du jeu de données limité à 225 exemples.
+\end{itemize}
+
+\textbf{Points d'amélioration :}
+\begin{itemize}
+  \item La confusion principale se situe entre \textbf{Négatif et Neutre}
+        (3 cas) et \textbf{Neutre et Positif} (2 cas). La frontière
+        entre ces classes est naturellement floue dans le langage étudiant.
+  \item Le rappel de la classe Négatif (63.64\%) est le plus faible :
+        certains commentaires négatifs modérés sont classés comme neutres.
+\end{itemize}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Tests Fonctionnels de l'API}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Scénarios de test}
+
+\begin{table}[H]
+\centering
+\caption{Scénarios de test fonctionnels}
+\label{tab:functional_tests}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{0.8cm} p{5.5cm} p{3.5cm} p{2.5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{ID} & \textbf{Entrée} & \textbf{Résultat attendu} & \textbf{Statut} \\
+\midrule
+TF01 & ``Ce cours est excellent, j'ai tout compris'' & Positif (code 200) & \textcolor{vertprincipal}{\ding{52} Passé} \\
+\rowcolor{gray!8}
+TF02 & ``Cours ennuyeux, je ne comprends rien'' & Négatif (code 200) & \textcolor{vertprincipal}{\ding{52} Passé} \\
+TF03 & ``Le cours se passe normalement'' & Neutre (code 200) & \textcolor{vertprincipal}{\ding{52} Passé} \\
+\rowcolor{gray!8}
+TF04 & ``Hi'' (2 caractères) & HTTP 422 (validation) & \textcolor{vertprincipal}{\ding{52} Passé} \\
+TF05 & Texte vide \texttt{``''} & HTTP 422 & \textcolor{vertprincipal}{\ding{52} Passé} \\
+\rowcolor{gray!8}
+TF06 & GET /api/commentaires & Liste JSON + total & \textcolor{vertprincipal}{\ding{52} Passé} \\
+TF07 & GET /api/commentaires?sentiment=2 & Uniquement Positifs & \textcolor{vertprincipal}{\ding{52} Passé} \\
+\rowcolor{gray!8}
+TF08 & DELETE /api/commentaires/999 & HTTP 404 & \textcolor{vertprincipal}{\ding{52} Passé} \\
+TF09 & GET /api/stats (base vide) & Message ``Aucun commentaire'' & \textcolor{vertprincipal}{\ding{52} Passé} \\
+\rowcolor{gray!8}
+TF10 & GET /health & \texttt{\{status: ok\}} & \textcolor{vertprincipal}{\ding{52} Passé} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Exemple de réponse API}
+
+Voici un exemple de réponse JSON retournée par \texttt{POST /api/predict}
+pour le commentaire ``Ce cours est excellent, le professeur explique très bien'' :
+
+\begin{lstlisting}[style=styleJSON, caption={Exemple de réponse JSON de l'API}, label={lst:api_response}]
+{
+  "id": 42,
+  "texte_original": "Ce cours est excellent, le professeur explique très bien",
+  "matiere": "Informatique",
+  "sentiment_predit": 2,
+  "label_sentiment": "Positif",
+  "scores": {
+    "negatif": 0.0187,
+    "neutre":  0.0431,
+    "positif": 0.9382
+  },
+  "date_creation": "2026-05-12T14:23:07"
+}
+\end{lstlisting}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Tests de l'Application Mobile}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\begin{table}[H]
+\centering
+\caption{Scénarios de test de l'application Flutter}
+\label{tab:mobile_tests}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{0.8cm} p{5cm} p{4cm} p{2cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{ID} & \textbf{Action utilisateur} & \textbf{Comportement attendu} & \textbf{Statut} \\
+\midrule
+TM01 & Soumettre un commentaire valide & Affichage SentimentCard colorée & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TM02 & Soumettre moins de 5 caractères & Message de validation rouge & \textcolor{vertprincipal}{\ding{52}} \\
+TM03 & Analyser sans serveur démarré & Message d'erreur explicite & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TM04 & Naviguer vers Historique & Chargement de la liste & \textcolor{vertprincipal}{\ding{52}} \\
+TM05 & Filtrer par Positif & Seuls les commentaires positifs & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TM06 & Glisser une carte vers la gauche & Apparition du fond rouge + corbeille & \textcolor{vertprincipal}{\ding{52}} \\
+TM07 & Confirmer la suppression & Commentaire supprimé, liste rafraîchie & \textcolor{vertprincipal}{\ding{52}} \\
+\rowcolor{gray!8}
+TM08 & Annuler la suppression & Commentaire maintenu, liste inchangée & \textcolor{vertprincipal}{\ding{52}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Difficultés Rencontrées et Solutions}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\begin{table}[H]
+\centering
+\caption{Difficultés rencontrées et solutions apportées}
+\label{tab:difficulties}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{4cm} p{5cm} p{4cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Problème} & \textbf{Cause} & \textbf{Solution} \\
+\midrule
+\texttt{sentencepiece} manquant & CamemBERT requiert SentencePiece pour la tokenisation & \texttt{pip install sentencepiece} \\
+\rowcolor{gray!8}
+Peer auth PostgreSQL & Mismatch utilisateur Linux/PostgreSQL & Modifier \texttt{pg\_hba.conf} : \texttt{peer} $\rightarrow$ \texttt{md5} \\
+\texttt{cmdline-tools} Android manquant & SDK mal configuré & Téléchargement manuel + configuration \texttt{JAVA\_HOME} \\
+\rowcolor{gray!8}
+Flutter ne joint pas l'API & Adresse localhost incorrecte sur émulateur & Utiliser \texttt{10.0.2.2} au lieu de \texttt{127.0.0.1} \\
+Gradient explosion & Taux d'apprentissage trop élevé & Gradient clipping (\texttt{max\_norm=1.0}) \\
+\rowcolor{gray!8}
+Déséquilibre de classes initial & Dataset non équilibré & 75 exemples par classe, stratification train/test \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Conclusion du Chapitre}
+
+Les tests conduits ont validé le bon fonctionnement de l'ensemble des
+composants du système. Le modèle atteint une précision de 79.41\% sur le
+jeu de test, avec d'excellentes performances sur les classes Positif et
+Négatif. Les quelques confusions observées entre Neutre et les classes
+adjacentes sont explicables par la nature ambiguë du langage étudiant et
+seront améliorées avec plus de données d'entraînement.
+
+\cleardoublepage

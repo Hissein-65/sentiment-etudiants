@@ -1,0 +1,463 @@
+% ==============================================================================
+% CHAPITRE 2 : ANALYSE ET CONCEPTION
+% ==============================================================================
+\chapter{Analyse et Conception}
+
+\begin{infobox}[Objectif du chapitre]
+Ce chapitre présente l'analyse fonctionnelle et non fonctionnelle du système,
+les diagrammes UML, l'architecture globale, le modèle de données et la
+justification des choix technologiques.
+\end{infobox}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Analyse des Besoins}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Identification des acteurs}
+
+Le système interagit avec deux catégories d'acteurs principaux :
+
+\begin{table}[H]
+\centering
+\caption{Acteurs du système}
+\label{tab:acteurs}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}p{3cm} p{5cm} p{5cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Acteur} & \textbf{Rôle} & \textbf{Interactions principales} \\
+\midrule
+Étudiant & Soumetteur de commentaires & Soumettre un commentaire, consulter le résultat, voir l'historique \\
+\midrule
+\rowcolor{gray!8}
+Enseignant & Consommateur d'analyses & Consulter le dashboard, filtrer par matière, voir les statistiques \\
+\midrule
+Système IA & Acteur interne & Analyser le sentiment, retourner les scores \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Besoins fonctionnels}
+
+Les besoins fonctionnels représentent les fonctionnalités que le système
+doit obligatoirement offrir :
+
+\begin{enumerate}[label=\textbf{BF\arabic*}., leftmargin=3em]
+  \item Le système doit permettre à un étudiant de soumettre un commentaire
+        textuel d'au moins 5 caractères.
+  \item Le système doit analyser automatiquement le sentiment du commentaire
+        et retourner la classe prédite (Négatif/Neutre/Positif) avec les
+        scores de confiance.
+  \item Le système doit permettre d'associer un commentaire à une matière
+        académique spécifique.
+  \item Le système doit sauvegarder chaque commentaire analysé avec ses
+        métadonnées dans la base de données.
+  \item Le système doit permettre la consultation de l'historique des
+        commentaires avec pagination.
+  \item Le système doit offrir des filtres de recherche par sentiment,
+        par matière et par date.
+  \item Le système doit permettre la suppression d'un commentaire par
+        son identifiant.
+  \item Le système doit exposer des statistiques agrégées sur les analyses
+        effectuées.
+  \item L'application mobile doit permettre la navigation entre l'écran
+        d'analyse et l'écran historique.
+  \item Le tableau de bord doit afficher des visualisations interactives
+        des tendances de sentiments.
+\end{enumerate}
+
+\subsection{Besoins non fonctionnels}
+
+\begin{table}[H]
+\centering
+\caption{Besoins non fonctionnels}
+\label{tab:bnf}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}p{3cm} p{10cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Critère} & \textbf{Exigence} \\
+\midrule
+Performance & Le temps de réponse d'une analyse ne doit pas dépasser 2 secondes en conditions normales \\
+\midrule
+\rowcolor{gray!8}
+Disponibilité & L'API doit être accessible 24h/24 une fois déployée \\
+\midrule
+Scalabilité & L'architecture doit permettre d'ajouter de nouvelles matières sans modification du code \\
+\midrule
+\rowcolor{gray!8}
+Maintenabilité & Le code doit être modulaire, documenté et versionné via Git \\
+\midrule
+Sécurité & Les données étudiantes doivent être stockées localement, sans transfert vers des services tiers \\
+\midrule
+\rowcolor{gray!8}
+Compatibilité & L'application mobile doit fonctionner sur Android 8.0+ \\
+\midrule
+Portabilité & Le système doit être déployable sous Linux Ubuntu sans dépendances propriétaires \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Diagrammes UML}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Diagramme de cas d'utilisation}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  actor/.style={circle, draw=bleuprincipal, fill=bleuprincipal!10,
+                minimum size=1cm, font=\small\bfseries},
+  usecase/.style={ellipse, draw=bleuprincipal, fill=white,
+                  minimum width=3.5cm, minimum height=0.8cm,
+                  font=\footnotesize, align=center, thick},
+  system/.style={rectangle, draw=bleuprincipal!60, dashed,
+                 minimum width=10cm, minimum height=8cm,
+                 label={[font=\bfseries\small, text=bleuprincipal]
+                        above:{Système d'Analyse de Sentiments}}}
+]
+  % Acteurs
+  \node[actor] (etudiant) at (-5, 0) {};
+  \node[below=0.1cm of etudiant, font=\small\bfseries] {Étudiant};
+
+  \node[actor] (enseignant) at (7, 0) {};
+  \node[below=0.1cm of enseignant, font=\small\bfseries] {Enseignant};
+
+  % Frontière système
+  \node[system] (sys) at (1, 0) {};
+
+  % Cas d'utilisation
+  \node[usecase] (uc1) at (1,  3.0) {Soumettre un\\commentaire};
+  \node[usecase] (uc2) at (1,  1.8) {Voir le résultat\\d'analyse};
+  \node[usecase] (uc3) at (1,  0.6) {Consulter\\l'historique};
+  \node[usecase] (uc4) at (1, -0.6) {Filtrer par\\sentiment/matière};
+  \node[usecase] (uc5) at (1, -1.8) {Supprimer un\\commentaire};
+  \node[usecase] (uc6) at (1, -3.0) {Voir les\\statistiques};
+
+  % Relations Étudiant
+  \draw[->] (etudiant) -- (uc1);
+  \draw[->] (etudiant) -- (uc2);
+  \draw[->] (etudiant) -- (uc3);
+  \draw[->] (etudiant) -- (uc4);
+  \draw[->] (etudiant) -- (uc5);
+
+  % Relations Enseignant
+  \draw[->] (enseignant) -- (uc3);
+  \draw[->] (enseignant) -- (uc4);
+  \draw[->] (enseignant) -- (uc6);
+  \draw[->] (enseignant) -- (uc5);
+
+\end{tikzpicture}
+\caption{Diagramme de cas d'utilisation du système}
+\label{fig:uml_usecase}
+\end{figure}
+
+\subsection{Diagramme de séquence — Analyse d'un commentaire}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  lifeline/.style={draw=bleuprincipal!50, dashed, thick},
+  box/.style={rectangle, draw=bleuprincipal, fill=bleuprincipal!10,
+              minimum width=2.2cm, minimum height=0.7cm,
+              font=\small\bfseries, align=center},
+  msg/.style={->, thick, color=bleuprincipal!80},
+  ret/.style={->, thick, dashed, color=vertprincipal!80}
+]
+  % En-têtes
+  \node[box] (user)    at (0,0)   {Étudiant\\(Flutter)};
+  \node[box] (api)     at (4,0)   {FastAPI\\Backend};
+  \node[box] (service) at (8,0)   {Service\\Prédiction};
+  \node[box] (model)   at (11.5,0){CamemBERT\\Model};
+  \node[box] (db)      at (15,0)  {PostgreSQL};
+
+  % Lignes de vie
+  \draw[lifeline] (0,-0.35) -- (0,-10);
+  \draw[lifeline] (4,-0.35) -- (4,-10);
+  \draw[lifeline] (8,-0.35) -- (8,-10);
+  \draw[lifeline] (11.5,-0.35) -- (11.5,-10);
+  \draw[lifeline] (15,-0.35) -- (15,-10);
+
+  % Messages
+  \draw[msg] (0,-1.2) -- node[above,font=\footnotesize]{POST /api/predict} (4,-1.2);
+  \draw[msg] (4,-2.0) -- node[above,font=\footnotesize]{predict(texte)} (8,-2.0);
+  \draw[msg] (8,-2.8) -- node[above,font=\footnotesize]{nettoyer(texte)} (8,-2.8);
+  \draw[msg] (8,-3.5) -- node[above,font=\footnotesize]{tokeniser(texte)} (11.5,-3.5);
+  \draw[msg] (11.5,-4.3) -- node[above,font=\footnotesize]{forward()} (11.5,-4.3);
+  \draw[ret] (11.5,-5.1) -- node[above,font=\footnotesize]{logits} (8,-5.1);
+  \draw[msg] (8,-5.9) -- node[above,font=\footnotesize]{softmax(logits)} (8,-5.9);
+  \draw[ret] (8,-6.7) -- node[above,font=\footnotesize]{\{sentiment, scores\}} (4,-6.7);
+  \draw[msg] (4,-7.5) -- node[above,font=\footnotesize]{INSERT commentaire} (15,-7.5);
+  \draw[ret] (15,-8.3) -- node[above,font=\footnotesize]{id, date\_creation} (4,-8.3);
+  \draw[ret] (4,-9.1) -- node[above,font=\footnotesize]{JSON résultat complet} (0,-9.1);
+
+\end{tikzpicture}
+\caption{Diagramme de séquence : analyse d'un commentaire}
+\label{fig:seq_analyse}
+\end{figure}
+
+\subsection{Diagramme de classes}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  class/.style={rectangle, draw=bleuprincipal, fill=white,
+                minimum width=5cm, thick},
+  attr/.style={font=\small\ttfamily},
+  meth/.style={font=\small\ttfamily, color=bleuprincipal}
+]
+
+% Classe Commentaire (DB)
+\node[class] (commentaire) at (0,0) {
+  \begin{tabular}{l}
+    \rowcolor{bleuprincipal!20}
+    \multicolumn{1}{c}{\textbf{Commentaire (DB)}} \\
+    \hline
+    \small\ttfamily id : Integer (PK) \\
+    \small\ttfamily texte\_original : Text \\
+    \small\ttfamily texte\_nettoye : Text \\
+    \small\ttfamily matiere : String \\
+    \small\ttfamily sentiment\_predit : Integer \\
+    \small\ttfamily label\_sentiment : String \\
+    \small\ttfamily score\_negatif : Float \\
+    \small\ttfamily score\_neutre : Float \\
+    \small\ttfamily score\_positif : Float \\
+    \small\ttfamily date\_creation : DateTime \\
+    \hline
+    \small\ttfamily to\_dict() : dict \\
+  \end{tabular}
+};
+
+% Classe ServicePrediction
+\node[class] (service) at (8.5, 2) {
+  \begin{tabular}{l}
+    \rowcolor{vertprincipal!20}
+    \multicolumn{1}{c}{\textbf{ServicePrediction}} \\
+    \hline
+    \small\ttfamily \_instance : Singleton \\
+    \small\ttfamily modele : CamemBERT \\
+    \small\ttfamily tokeniseur : Tokenizer \\
+    \small\ttfamily device : torch.device \\
+    \hline
+    \small\ttfamily charger() : void \\
+    \small\ttfamily predict(texte) : dict \\
+  \end{tabular}
+};
+
+% Classe Commentaire (Flutter)
+\node[class] (flutter) at (8.5, -2.5) {
+  \begin{tabular}{l}
+    \rowcolor{orangeaccent!15}
+    \multicolumn{1}{c}{\textbf{Commentaire (Flutter)}} \\
+    \hline
+    \small\ttfamily id : int \\
+    \small\ttfamily texteOriginal : String \\
+    \small\ttfamily matiere : String? \\
+    \small\ttfamily sentimentPredit : int \\
+    \small\ttfamily scores : Map \\
+    \hline
+    \small\ttfamily fromJson(json) \\
+    \small\ttfamily emoji : String \\
+    \small\ttfamily scoreConfiance : double \\
+  \end{tabular}
+};
+
+% Flèches
+\draw[->, thick, color=bleuprincipal] (service) -- node[above, font=\small]{utilise} (commentaire);
+\draw[->, thick, dashed, color=orangeaccent] (flutter) -- node[right, font=\small]{mappe} (commentaire);
+
+\end{tikzpicture}
+\caption{Diagramme de classes simplifié}
+\label{fig:class_diagram}
+\end{figure}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Architecture Globale du Système}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Vue d'ensemble}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  layer/.style={rectangle, rounded corners=6pt, minimum width=3.5cm,
+                minimum height=1.2cm, align=center, font=\small\bfseries,
+                thick, draw},
+  arrow/.style={->, thick, color=bleuprincipal!70},
+  label/.style={font=\tiny, color=gray}
+]
+
+% Couche présentation
+\node[layer, fill=bleuclaire!20, draw=bleuclaire] (flutter) at (0, 6)
+  {\faIcon{mobile-alt} Application\\Flutter};
+\node[layer, fill=bleuclaire!20, draw=bleuclaire] (streamlit) at (5, 6)
+  {\faIcon{chart-bar} Dashboard\\Streamlit};
+
+% Couche API
+\node[layer, fill=bleuprincipal!15, draw=bleuprincipal, minimum width=9cm]
+  (fastapi) at (2.5, 4) {\faIcon{server} API REST — FastAPI (port 8000)};
+
+% Couche services
+\node[layer, fill=vertprincipal!15, draw=vertprincipal] (predict) at (0, 2)
+  {\faIcon{brain} Service\\Prédiction};
+\node[layer, fill=vertprincipal!15, draw=vertprincipal] (router) at (5, 2)
+  {\faIcon{route} Routeur\\Commentaires};
+
+% Couche IA
+\node[layer, fill=orangeaccent!15, draw=orangeaccent] (camembert) at (0, 0)
+  {\faIcon{robot} CamemBERT\\Fine-tuné};
+
+% Couche données
+\node[layer, fill=rougeprincipal!10, draw=rougeprincipal] (postgres) at (5, 0)
+  {\faIcon{database} PostgreSQL\\sentiment\_etudiants};
+
+% Connexions
+\draw[arrow] (flutter) -- node[label, right]{HTTP/JSON} (fastapi);
+\draw[arrow] (streamlit) -- node[label, left]{HTTP/JSON} (fastapi);
+\draw[arrow] (fastapi) -- (predict);
+\draw[arrow] (fastapi) -- (router);
+\draw[arrow] (predict) -- (camembert);
+\draw[arrow] (router) -- node[label, right]{SQLAlchemy ORM} (postgres);
+\draw[arrow] (predict) -- node[label, below]{sauvegarder} (router);
+
+% Légende
+\node[font=\tiny, gray] at (2.5, -1.2)
+  {Architecture 4 couches : Présentation — API — Métier — Données};
+
+\end{tikzpicture}
+\caption{Architecture globale du système en 4 couches}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Description des couches}
+
+\subsubsection{Couche Présentation}
+Comprend deux interfaces utilisateur distinctes selon le profil d'utilisateur :
+l'application mobile Flutter pour les étudiants, et le dashboard Streamlit
+pour les enseignants/administrateurs. Les deux communiquent exclusivement
+via l'API REST.
+
+\subsubsection{Couche API (FastAPI)}
+Le point d'entrée unique du système. FastAPI gère la validation des
+requêtes entrantes via les schémas Pydantic, l'authentification CORS,
+le routage vers les services appropriés et la sérialisation des réponses
+JSON.
+
+\subsubsection{Couche Métier}
+Contient la logique fonctionnelle : le \texttt{ServicePrediction} (singleton
+gérant le modèle CamemBERT) et le routeur de commentaires gérant les
+opérations CRUD.
+
+\subsubsection{Couche Données}
+PostgreSQL stocke toutes les analyses effectuées. SQLAlchemy ORM fait
+office de couche d'abstraction, permettant d'interagir avec la base via
+des objets Python sans écrire de SQL brut.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Modèle de Données}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\subsection{Modèle Conceptuel de Données (MCD)}
+
+Le modèle de données est intentionnellement simple : une seule entité
+principale \textbf{Commentaire} regroupe toutes les informations relatives
+à une analyse de sentiment.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  entity/.style={rectangle, draw=bleuprincipal, fill=bleuprincipal!10,
+                 minimum width=6cm, font=\small\bfseries},
+  attr/.style={font=\footnotesize\ttfamily}
+]
+\node[entity] (header) at (0,0) {COMMENTAIRE};
+\node[rectangle, draw=bleuprincipal!60, fill=white, minimum width=6cm,
+      align=left, font=\footnotesize\ttfamily] (body) at (0,-3.5) {
+  \begin{tabular}{ll}
+    \textbf{PK} & id : SERIAL \\
+    & texte\_original : TEXT \\
+    & texte\_nettoye : TEXT \\
+    & matiere : VARCHAR(100) \\
+    & sentiment\_predit : INTEGER \\
+    & label\_sentiment : VARCHAR(20) \\
+    & score\_negatif : FLOAT \\
+    & score\_neutre : FLOAT \\
+    & score\_positif : FLOAT \\
+    & date\_creation : TIMESTAMP \\
+  \end{tabular}
+};
+\draw[bleuprincipal] (header.south west) -- (body.north west);
+\draw[bleuprincipal] (header.south east) -- (body.north east);
+\end{tikzpicture}
+\caption{Modèle Conceptuel de Données}
+\label{fig:mcd}
+\end{figure}
+
+\subsection{Modèle Logique de Données (MLD)}
+
+Le MLD correspond directement à la table SQL créée par SQLAlchemy :
+
+\begin{lstlisting}[style=styleSQL, caption={Schéma SQL de la table commentaires}, label={lst:sql_schema}]
+CREATE TABLE commentaires (
+    id               SERIAL          PRIMARY KEY,
+    texte_original   TEXT            NOT NULL,
+    texte_nettoye    TEXT,
+    matiere          VARCHAR(100),
+    sentiment_predit INTEGER         NOT NULL,  -- 0, 1 ou 2
+    label_sentiment  VARCHAR(20)     NOT NULL,  -- 'Negatif', 'Neutre', 'Positif'
+    score_negatif    DOUBLE PRECISION,
+    score_neutre     DOUBLE PRECISION,
+    score_positif    DOUBLE PRECISION,
+    date_creation    TIMESTAMP       DEFAULT NOW()
+);
+\end{lstlisting}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{Justification des Choix Technologiques}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\begin{table}[H]
+\centering
+\caption{Justification des choix technologiques}
+\label{tab:choix_tech}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{p{2.5cm} p{3cm} p{7cm}}
+\toprule
+\rowcolor{bleuprincipal!15}
+\textbf{Technologie} & \textbf{Rôle} & \textbf{Justification} \\
+\midrule
+CamemBERT & Modèle NLP & État de l'art pour le français, pré-entraîné sur 138 Go, surpasse tous les modèles multilingues \\
+\midrule
+\rowcolor{gray!8}
+PyTorch & Framework DL & Standard industriel, support natif HuggingFace, flexible et débuggable \\
+\midrule
+HuggingFace & Bibliothèque & Simplifie le chargement et fine-tuning des Transformers, vaste communauté \\
+\midrule
+\rowcolor{gray!8}
+FastAPI & API REST & Le plus rapide des frameworks Python API, typage fort, documentation automatique Swagger \\
+\midrule
+SQLAlchemy & ORM & Abstraction DB portable, sécurité SQL injection, migrations faciles \\
+\midrule
+\rowcolor{gray!8}
+PostgreSQL & Base de données & ACID, performances, support JSON natif, open-source et robuste \\
+\midrule
+Streamlit & Dashboard & Python pur, déploiement instantané, intégration Plotly native \\
+\midrule
+\rowcolor{gray!8}
+Flutter & Application mobile & Cross-platform (Android/iOS/Web), Material 3, performances natives \\
+\midrule
+Dart & Langage mobile & Typage fort, compilation AOT, excellent pour les UIs réactives \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Conclusion du Chapitre}
+
+L'analyse fonctionnelle a permis d'identifier précisément les besoins des
+utilisateurs et de concevoir une architecture répondant à ces besoins de
+manière optimale. Le choix de CamemBERT comme modèle central, combiné à
+FastAPI, PostgreSQL et Flutter, forme un écosystème cohérent et moderne.
+Le chapitre suivant détaille l'implémentation concrète de chaque composant.
+
+\cleardoublepage

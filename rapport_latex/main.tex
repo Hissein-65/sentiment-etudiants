@@ -1,0 +1,281 @@
+% ==============================================================================
+% MÉMOIRE DE FIN D'ÉTUDES — SYSTÈME D'ANALYSE DE SENTIMENTS
+% Auteur : Hissein Nasser
+% Compilateur : pdflatex (2 passes minimum)
+% ==============================================================================
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ── Encodage et langue ─────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+
+% ── Mise en page ───────────────────────────────────────────────────────────────
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ── Couleurs ───────────────────────────────────────────────────────────────────
+\usepackage{xcolor}
+\definecolor{bleuprincipal}{RGB}{31,73,125}
+\definecolor{bleuclaire}{RGB}{46,134,193}
+\definecolor{vertprincipal}{RGB}{31,138,112}
+\definecolor{rougeprincipal}{RGB}{231,76,60}
+\definecolor{griscode}{RGB}{248,249,250}
+\definecolor{grisbordure}{RGB}{204,204,204}
+\definecolor{orangeaccent}{RGB}{211,84,0}
+\definecolor{jauneneutre}{RGB}{241,196,15}
+
+% ── Graphiques et figures ──────────────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{font=small, labelfont={bf,color=bleuprincipal}}
+
+% ── Tableaux ───────────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{colortbl}
+
+% ── TikZ et diagrammes ────────────────────────────────────────────────────────
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc,
+                shadows, decorations.pathreplacing, fit, backgrounds,
+                matrix, patterns, mindmap}
+
+% ── Listings (code source) ────────────────────────────────────────────────────
+\usepackage{listings}
+\usepackage{lstautogobble}
+
+\lstdefinestyle{stylePython}{
+  language=Python,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal}\bfseries,
+  stringstyle=\color{rougeprincipal},
+  commentstyle=\color{vertprincipal}\itshape,
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  breaklines=true,
+  breakatwhitespace=false,
+  frame=single,
+  rulecolor=\color{grisbordure},
+  tabsize=4,
+  showstringspaces=false,
+  captionpos=b,
+  autogobble=true,
+  xleftmargin=1cm,
+  morekeywords={self, True, False, None, async, await, yield}
+}
+
+\lstdefinestyle{styleDart}{
+  language=Java,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal}\bfseries,
+  stringstyle=\color{rougeprincipal},
+  commentstyle=\color{vertprincipal}\itshape,
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{grisbordure},
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b,
+  autogobble=true,
+  xleftmargin=1cm,
+  morekeywords={final, const, var, String, int, double, bool, void,
+                Widget, StatelessWidget, StatefulWidget, BuildContext,
+                Future, async, await, override, required, class}
+}
+
+\lstdefinestyle{styleJSON}{
+  language=Python,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal},
+  stringstyle=\color{vertprincipal},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{grisbordure},
+  captionpos=b,
+  xleftmargin=1cm
+}
+
+\lstdefinestyle{styleSQL}{
+  language=SQL,
+  backgroundcolor=\color{griscode},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{bleuprincipal}\bfseries,
+  stringstyle=\color{rougeprincipal},
+  commentstyle=\color{gray}\itshape,
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{grisbordure},
+  captionpos=b,
+  xleftmargin=1cm
+}
+
+\lstset{style=stylePython}
+
+% ── En-têtes et pieds de page ─────────────────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{bleuprincipal}{\leftmark}}
+\fancyhead[R]{\small\textcolor{gray}{Analyse de Sentiments Étudiants}}
+\fancyfoot[C]{\textcolor{gray}{\thepage}}
+\fancyfoot[R]{\small\textcolor{gray}{Hissein Nasser — PFE 2026}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{bleuprincipal}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrulewidth}{0pt}
+
+% ── Style des chapitres ────────────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\huge\bfseries\color{bleuprincipal}}
+  {\colorbox{bleuprincipal}{\textcolor{white}{\quad\thechapter\quad}}}
+  {1em}{}[\vspace{-0.5em}\rule{\textwidth}{2pt}]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{bleuprincipal}}
+  {\thesection}
+  {0.8em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{bleuclaire}}
+  {\thesubsection}
+  {0.8em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{orangeaccent}}
+  {\thesubsubsection}
+  {0.8em}{}
+
+% ── Hyperliens ─────────────────────────────────────────────────────────────────
+\usepackage[
+  colorlinks=true,
+  linkcolor=bleuprincipal,
+  citecolor=vertprincipal,
+  urlcolor=bleuclaire,
+  pdfauthor={Hissein Nasser},
+  pdftitle={Système d'Analyse de Sentiments des Commentaires Étudiants},
+  pdfsubject={Mémoire de Fin d'Études},
+  pdfkeywords={NLP, CamemBERT, Sentiment Analysis, FastAPI, Flutter, PyTorch}
+]{hyperref}
+
+% ── Bibliographie ──────────────────────────────────────────────────────────────
+\usepackage[backend=bibtex,style=ieee,sorting=none]{biblatex}
+\addbibresource{bibliography.bib}
+
+% ── Acronymes ──────────────────────────────────────────────────────────────────
+\usepackage[acronym,toc]{glossaries}
+\makeglossaries
+
+% ── Utilitaires ───────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{pifont}
+\usepackage{fontawesome5}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% ── Boîtes personnalisées ─────────────────────────────────────────────────────
+\newtcolorbox{infobox}[1][]{
+  enhanced, breakable,
+  colback=bleuclaire!8!white,
+  colframe=bleuclaire,
+  fonttitle=\bfseries,
+  title={#1},
+  left=4pt, right=4pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{definitionbox}[1][]{
+  enhanced, breakable,
+  colback=vertprincipal!8!white,
+  colframe=vertprincipal,
+  fonttitle=\bfseries,
+  title={#1},
+  left=4pt, right=4pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{warningbox}[1][]{
+  enhanced,
+  colback=rougeprincipal!8!white,
+  colframe=rougeprincipal,
+  fonttitle=\bfseries,
+  title={#1},
+  left=4pt, right=4pt, top=4pt, bottom=4pt
+}
+
+% ── Commandes personnalisées ───────────────────────────────────────────────────
+\newcommand{\code}[1]{\texttt{\textcolor{bleuprincipal}{#1}}}
+\newcommand{\important}[1]{\textbf{\textcolor{rougeprincipal}{#1}}}
+
+% ── Acronymes définis ─────────────────────────────────────────────────────────
+\input{frontmatter/acronymes}
+
+% ==============================================================================
+% DÉBUT DU DOCUMENT
+% ==============================================================================
+\begin{document}
+
+\pagenumbering{gobble}
+
+% ── Page de garde ─────────────────────────────────────────────────────────────
+\input{frontmatter/pagedegarde}
+
+% ── Pages liminaires ──────────────────────────────────────────────────────────
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\input{frontmatter/dedicace}
+\input{frontmatter/remerciements}
+\input{frontmatter/resume}
+\input{frontmatter/abstract}
+
+% ── Tables ────────────────────────────────────────────────────────────────────
+{
+  \hypersetup{linkcolor=black}
+  \tableofcontents
+  \listoffigures
+  \listoftables
+}
+
+\printglossary[type=\acronymtype, title={Liste des Acronymes}]
+
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ── Corps du rapport ──────────────────────────────────────────────────────────
+\input{chapters/introduction}
+\input{chapters/chapter1}
+\input{chapters/chapter2}
+\input{chapters/chapter3}
+\input{chapters/chapter4}
+\input{chapters/chapter5}
+\input{chapters/conclusion}
+
+% ── Bibliographie ─────────────────────────────────────────────────────────────
+\printbibliography[heading=bibintoc, title={Références Bibliographiques}]
+
+\end{document}

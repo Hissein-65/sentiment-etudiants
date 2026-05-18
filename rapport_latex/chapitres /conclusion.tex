@@ -1,0 +1,104 @@
+% ==============================================================================
+% CONCLUSION GÉNÉRALE
+% ==============================================================================
+\chapter*{Conclusion Générale}
+\addcontentsline{toc}{chapter}{Conclusion Générale}
+\markboth{CONCLUSION GÉNÉRALE}{}
+
+\vspace{0.3cm}
+
+Ce mémoire a présenté la conception et le développement d'un système
+complet d'analyse automatique de sentiments appliqué aux commentaires
+d'étudiants sur leurs cours universitaires. Ce projet représente une
+intégration réussie de plusieurs domaines de l'informatique moderne :
+l'intelligence artificielle, le développement web et mobile, les bases
+de données relationnelles et les architectures distribuées.
+
+\vspace{0.5cm}
+
+\section*{Synthèse des réalisations}
+
+\begin{tcolorbox}[
+  enhanced,
+  colback=bleuprincipal!5!white,
+  colframe=bleuprincipal,
+  boxrule=1.5pt, arc=6pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt
+]
+\begin{enumerate}
+  \item \textbf{Modèle d'IA :} Le modèle CamemBERT fine-tuné sur 225
+        commentaires étudiants en français a atteint une précision de
+        \textbf{79.41\%} sur le jeu de test, démontrant la puissance du
+        transfer learning pour des tâches spécialisées avec peu de données.
+
+  \item \textbf{API REST :} Le serveur FastAPI expose 5 endpoints documentés,
+        gère la validation des données via Pydantic et persiste chaque analyse
+        dans PostgreSQL via SQLAlchemy ORM. Le pattern Singleton garantit
+        des temps de réponse inférieurs à 1 seconde.
+
+  \item \textbf{Dashboard analytique :} Le tableau de bord Streamlit offre
+        des visualisations interactives (camembert, histogrammes, jauges)
+        permettant aux enseignants de suivre en temps réel les tendances
+        de satisfaction par cours et par matière.
+
+  \item \textbf{Application mobile :} L'application Flutter offre une
+        interface intuitive, matérielle et moderne permettant aux étudiants
+        de soumettre leurs commentaires, consulter les résultats en temps réel
+        et naviguer dans l'historique depuis n'importe quel smartphone Android.
+\end{enumerate}
+\end{tcolorbox}
+
+\vspace{0.5cm}
+
+\section*{Bilan technique}
+
+Ce projet a permis d'explorer et de maîtriser un large spectre de
+technologies : PyTorch et HuggingFace Transformers pour le deep learning,
+FastAPI et SQLAlchemy pour le backend, Flutter/Dart pour le mobile, et
+Streamlit/Plotly pour la visualisation. Cette polyvalence technique
+constitue un acquis précieux, directement transférable dans un contexte
+professionnel.
+
+Sur le plan algorithmique, la compréhension approfondie des mécanismes
+d'attention des Transformers, du fine-tuning, de l'optimiseur AdamW et
+du scheduler linéaire avec warmup a enrichi notre bagage en apprentissage
+automatique moderne. La résolution des défis concrets — débogage du
+pipeline de données, gestion des erreurs d'authentification PostgreSQL,
+configuration de l'environnement Android — a également développé
+des compétences pratiques essentielles.
+
+\vspace{0.5cm}
+
+\section*{Perspectives immédiates}
+
+Les trois priorités d'amélioration identifiées sont :
+\begin{itemize}
+  \item \textbf{Augmentation des données :} collecter 500+ commentaires
+        réels pour améliorer la précision au-delà de 85\%.
+  \item \textbf{Sécurisation :} implémenter l'authentification JWT et le
+        déploiement Docker pour une mise en production réelle.
+  \item \textbf{Analyse d'aspects :} passer d'une classification globale
+        à une analyse fine des aspects pédagogiques mentionnés.
+\end{itemize}
+
+\vspace{0.5cm}
+
+\section*{Mot final}
+
+Ce projet de fin d'études a été l'occasion de réaliser que la frontière
+entre recherche et application concrète est plus mince qu'il n'y paraît.
+CamemBERT, un modèle sorti de laboratoires de recherche de renom, peut
+être adapté en quelques jours pour résoudre un problème réel et local.
+Cette capacité à connecter la recherche fondamentale à des besoins
+pratiques constitue, à notre sens, l'essence même de l'ingénierie
+informatique moderne.
+
+\vspace{0.5cm}
+
+\begin{flushright}
+\textit{``La technologie est à son meilleur quand elle rapproche les gens.''}\\
+\vspace{0.3cm}
+\textbf{Hissein Nasser} — Mai 2026
+\end{flushright}
+
+\cleardoublepage

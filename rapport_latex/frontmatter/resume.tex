@@ -1,0 +1,62 @@
+% ==============================================================================
+% RÉSUMÉ (FRANÇAIS)
+% ==============================================================================
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+
+\begin{tcolorbox}[
+  enhanced,
+  colback=bleuprincipal!5!white,
+  colframe=bleuprincipal,
+  boxrule=1.5pt, arc=6pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt
+]
+
+Ce mémoire présente la conception et le développement d'un système complet
+d'analyse automatique de sentiments appliqué aux commentaires d'étudiants
+sur leurs cours universitaires. Face à la difficulté de traiter manuellement
+des milliers de retours étudiants, ce projet propose une solution intelligente,
+automatisée et temps réel, exploitant les avancées récentes du Traitement
+Automatique du Langage Naturel (TALN).
+
+\vspace{0.5em}
+
+Le système repose sur le modèle de langage \textbf{CamemBERT}
+(\textit{camembert-base}), une variante française de BERT développée par
+Inria et CNRS, fine-tuné pour la classification de sentiments en trois
+catégories : \textbf{Négatif}, \textbf{Neutre} et \textbf{Positif}. Le modèle
+a été entraîné sur un jeu de données de 225 commentaires étudiants en langue
+française, équilibrés entre les trois classes, avec les hyperparamètres
+optimaux suivants : taux d'apprentissage de $2 \times 10^{-5}$, taille de
+lot de 16, 3 epochs d'entraînement et une longueur maximale de séquence de
+128 tokens. L'optimiseur AdamW avec un scheduler linéaire à palier de
+chauffe a été utilisé pour garantir la convergence. Le modèle atteint
+une précision de \textbf{79,41\%} sur le jeu de test.
+
+\vspace{0.5em}
+
+L'architecture globale du système comprend quatre composants principaux :
+(1) un \textbf{backend RESTful} développé avec FastAPI et SQLAlchemy
+communiquant avec une base de données PostgreSQL pour la persistance des
+analyses ; (2) un \textbf{tableau de bord analytique} Streamlit enrichi
+de visualisations interactives Plotly pour le suivi en temps réel des
+tendances ; (3) une \textbf{application mobile} Flutter offrant aux
+étudiants une interface moderne et intuitive pour soumettre leurs commentaires
+et consulter les résultats ; (4) un \textbf{pipeline de prétraitement}
+NLP complet comprenant la normalisation Unicode, la suppression des caractères
+spéciaux et la tokenisation CamemBERT.
+
+\vspace{0.5em}
+
+Les résultats obtenus démontrent la faisabilité et l'efficacité d'une telle
+approche, même avec un jeu de données limité, ouvrant la voie à des
+améliorations significatives avec davantage de données annotées.
+
+\end{tcolorbox}
+
+\vspace{0.8em}
+\noindent\textbf{Mots-clés :} Analyse de sentiments, TALN, CamemBERT,
+Apprentissage automatique, FastAPI, Flutter, PostgreSQL, Classification de
+texte, Fine-tuning, Deep learning.
+
+\cleardoublepage

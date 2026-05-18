@@ -1,0 +1,60 @@
+% ==============================================================================
+% ABSTRACT (ENGLISH)
+% ==============================================================================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+\begin{tcolorbox}[
+  enhanced,
+  colback=vertprincipal!5!white,
+  colframe=vertprincipal,
+  boxrule=1.5pt, arc=6pt,
+  left=10pt, right=10pt, top=8pt, bottom=8pt
+]
+
+This thesis presents the design and development of a complete automated
+sentiment analysis system applied to student feedback on university courses.
+Faced with the challenge of manually processing thousands of student reviews,
+this project proposes an intelligent, automated, and real-time solution
+leveraging recent advances in Natural Language Processing (NLP).
+
+\vspace{0.5em}
+
+The system is built upon the \textbf{CamemBERT} language model
+(\textit{camembert-base}), a French variant of BERT developed by Inria and
+CNRS, fine-tuned for three-class sentiment classification: \textbf{Negative},
+\textbf{Neutral}, and \textbf{Positive}. The model was trained on a dataset
+of 225 French student comments, balanced across the three classes, using the
+following hyperparameters: learning rate of $2 \times 10^{-5}$, batch size
+of 16, 3 training epochs, and maximum sequence length of 128 tokens. The
+AdamW optimizer with a linear warmup scheduler was employed to ensure
+stable convergence. The model achieves an accuracy of \textbf{79.41\%} on
+the test set.
+
+\vspace{0.5em}
+
+The overall system architecture consists of four main components:
+(1) a \textbf{RESTful backend} developed with FastAPI and SQLAlchemy
+interfacing with a PostgreSQL database for result persistence;
+(2) an \textbf{analytics dashboard} built with Streamlit and enriched
+with interactive Plotly visualizations for real-time trend monitoring;
+(3) a \textbf{mobile application} built with Flutter providing students
+with a modern, intuitive interface to submit comments and view analysis
+results; (4) a complete \textbf{NLP preprocessing pipeline} including
+Unicode normalization, special character removal, and CamemBERT
+tokenization.
+
+\vspace{0.5em}
+
+The obtained results demonstrate the feasibility and effectiveness of such
+an approach, even with a limited dataset, paving the way for significant
+improvements with additional annotated data.
+
+\end{tcolorbox}
+
+\vspace{0.8em}
+\noindent\textbf{Keywords:} Sentiment analysis, NLP, CamemBERT, Machine
+learning, FastAPI, Flutter, PostgreSQL, Text classification, Fine-tuning,
+Deep learning, Transfer learning.
+
+\cleardoublepage
